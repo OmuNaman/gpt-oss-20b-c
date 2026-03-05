@@ -1,0 +1,19 @@
+# Model weights and tokenizer binaries (too large for git)
+raw_bin/
+*.bin
+
+# Compiled executables
+*.exe
+*.out
+*.o
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# HuggingFace cache
+.cache/
