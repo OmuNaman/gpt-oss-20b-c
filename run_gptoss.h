@@ -130,9 +130,9 @@ typedef struct {
     // Output
     float* logits;      // (vocab_size,) final logits
 
-    // KV cache
-    float* key_cache;   // (num_layers, max_seq_len, kv_dim)
-    float* value_cache; // (num_layers, max_seq_len, kv_dim)
+    // KV cache — float16 to halve attention bandwidth (384 MB → 192 MB)
+    uint16_t* key_cache;   // (num_layers, max_seq_len, kv_dim) as float16
+    uint16_t* value_cache; // (num_layers, max_seq_len, kv_dim) as float16
 } RunState;
 
 // ----------------------------------------------------------------------------

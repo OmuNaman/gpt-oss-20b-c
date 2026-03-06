@@ -43,6 +43,17 @@
 #define USE_SIMD 0
 #endif
 
+// E8M0 scale lookup tables — replaces ldexpf() in MXFP4 hot path
+static float e8m0_lut[256];      // e8m0_lut[i] = 2^(i-127)  for scalar path
+static float e8m0_half_lut[256]; // e8m0_half_lut[i] = 2^(i-128)  for SIMD path (absorbs 2x LUT encoding)
+
+static void init_e8m0_luts(void) {
+    for (int i = 0; i < 256; i++) {
+        e8m0_lut[i] = ldexpf(1.0f, i - 127);
+        e8m0_half_lut[i] = ldexpf(1.0f, i - 128);
+    }
+}
+
 // ============================================================================
 // Section 1: Float16 conversion
 // ============================================================================
@@ -70,6 +81,18 @@ static inline float f16_to_f32(uint16_t h) {
 
     union { uint32_t u; float f; } u = { sign | ((uint32_t)(exp + 112) << 23) | ((uint32_t)mant << 13) };
     return u.f;
+}
+
+// Float32 → Float16 conversion (reverse of f16_to_f32)
+static inline uint16_t f32_to_f16(float f) {
+    union { float f; uint32_t u; } v = { f };
+    uint32_t b = v.u;
+    uint16_t sign = (b >> 16) & 0x8000;
+    int32_t exp = ((b >> 23) & 0xFF) - 127 + 15;
+    uint32_t mant = (b >> 13) & 0x3FF;
+    if (exp <= 0) return sign;           // underflow → ±zero
+    if (exp >= 31) return sign | 0x7C00; // overflow → ±inf
+    return sign | (uint16_t)(exp << 10) | (uint16_t)mant;
 }
 
 // ============================================================================
@@ -143,6 +166,8 @@ static void f16_matmul(float* out, const float* x, const uint16_t* w, int n, int
     for (int i = 0; i < d; i++) {
         const uint16_t* wi = w + (size_t)i * n;
 #if USE_SIMD
+        // Prefetch next row to hide DDR5 latency
+        if (i + 1 < d) _mm_prefetch((const char*)(w + (size_t)(i+1) * n), _MM_HINT_T0);
         __m256 acc = _mm256_setzero_ps();
         int j;
         for (j = 0; j + 7 < n; j += 8) {
@@ -173,6 +198,41 @@ static void f16_matmul(float* out, const float* x, const uint16_t* w, int n, int
 static void f16_matmul_bias(float* out, const float* x, const uint16_t* w,
                              const uint16_t* bias, int n, int d) {
     #pragma omp parallel for
+    for (int i = 0; i < d; i++) {
+        const uint16_t* wi = w + (size_t)i * n;
+#if USE_SIMD
+        // Prefetch next row to hide DDR5 latency
+        if (i + 1 < d) _mm_prefetch((const char*)(w + (size_t)(i+1) * n), _MM_HINT_T0);
+        __m256 acc = _mm256_setzero_ps();
+        int j;
+        for (j = 0; j + 7 < n; j += 8) {
+            __m128i h8 = _mm_loadu_si128((__m128i*)(wi + j));
+            __m256 w8 = _mm256_cvtph_ps(h8);
+            __m256 x8 = _mm256_loadu_ps(x + j);
+            acc = _mm256_fmadd_ps(w8, x8, acc);
+        }
+        __m128 hi = _mm256_extractf128_ps(acc, 1);
+        __m128 lo = _mm256_castps256_ps128(acc);
+        __m128 s4 = _mm_add_ps(lo, hi);
+        s4 = _mm_hadd_ps(s4, s4);
+        s4 = _mm_hadd_ps(s4, s4);
+        float val = _mm_cvtss_f32(s4);
+        for (; j < n; j++) val += f16_to_f32(wi[j]) * x[j];
+        out[i] = val + f16_to_f32(bias[i]);
+#else
+        float val = 0.0f;
+        for (int j = 0; j < n; j++) {
+            val += f16_to_f32(wi[j]) * x[j];
+        }
+        out[i] = val + f16_to_f32(bias[i]);
+#endif
+    }
+}
+
+// Serial f16 matmul+bias for small matrices (e.g. router: 32 × 2880)
+// Avoids OpenMP fork/join overhead when d is small.
+static void f16_matmul_bias_serial(float* out, const float* x, const uint16_t* w,
+                                    const uint16_t* bias, int n, int d) {
     for (int i = 0; i < d; i++) {
         const uint16_t* wi = w + (size_t)i * n;
 #if USE_SIMD
@@ -226,7 +286,9 @@ static inline float mxfp4_dot_row(const uint8_t* blocks, const uint8_t* scales,
 
     __m256 total_acc = _mm256_setzero_ps();
     for (int g = 0; g < n_groups; g++) {
-        float scale = ldexpf(1.0f, (int)scales[g] - 128);  // -128 absorbs the 2x LUT encoding
+        // Prefetch 2 groups ahead to hide memory latency
+        if (g + 2 < n_groups) _mm_prefetch((const char*)(blocks + (g+2) * 16), _MM_HINT_T0);
+        float scale = e8m0_half_lut[scales[g]];  // LUT replaces ldexpf; -128 absorbs 2x LUT encoding
         __m256 scale_v = _mm256_set1_ps(scale);
         const uint8_t* gb = blocks + g * 16;
         const float* gx = x + g * 32;
@@ -276,7 +338,7 @@ static inline float mxfp4_dot_row(const uint8_t* blocks, const uint8_t* scales,
 #else
     float total = 0.0f;
     for (int g = 0; g < n_groups; g++) {
-        float scale = ldexpf(1.0f, (int)scales[g] - 127);
+        float scale = e8m0_lut[scales[g]];
         float group_dot = 0.0f;
         const uint8_t* gb = blocks + g * 16;
         const float* gx = x + g * 32;
@@ -301,6 +363,13 @@ static void mxfp4_matmul_bias(float* out, const float* x,
                                 int packed_cols, int n_groups) {
     #pragma omp parallel for
     for (int i = 0; i < out_dim; i++) {
+#if USE_SIMD
+        // Prefetch next row's blocks and scales to hide DDR5 latency
+        if (i + 1 < out_dim) {
+            _mm_prefetch((const char*)(blocks + (size_t)(i+1) * packed_cols), _MM_HINT_T0);
+            _mm_prefetch((const char*)(scales + (size_t)(i+1) * n_groups), _MM_HINT_T0);
+        }
+#endif
         const uint8_t* row_blocks = blocks + (size_t)i * packed_cols;
         const uint8_t* row_scales = scales + (size_t)i * n_groups;
         out[i] = mxfp4_dot_row(row_blocks, row_scales, x, n_groups)
@@ -406,14 +475,14 @@ static void malloc_run_state(RunState* s, Config* p, int qkv_dim, int attn_out_d
     }
     s->moe_out    = (float*)aligned_calloc(p->hidden_size, sizeof(float));
     s->logits     = (float*)aligned_calloc(p->vocab_size, sizeof(float));
-    s->key_cache  = (float*)aligned_calloc((size_t)p->num_layers * p->max_seq_len * kv_dim, sizeof(float));
-    s->value_cache = (float*)aligned_calloc((size_t)p->num_layers * p->max_seq_len * kv_dim, sizeof(float));
+    s->key_cache  = (uint16_t*)aligned_calloc((size_t)p->num_layers * p->max_seq_len * kv_dim, sizeof(uint16_t));
+    s->value_cache = (uint16_t*)aligned_calloc((size_t)p->num_layers * p->max_seq_len * kv_dim, sizeof(uint16_t));
 
     if (!s->x || !s->xb || !s->xb2 || !s->qkv || !s->attn_out || !s->att ||
         !s->gate_logits || !s->expert_bufs[0] || !s->expert_acts[0] || !s->expert_outs[0] ||
         !s->moe_out || !s->logits || !s->key_cache || !s->value_cache) {
         fprintf(stderr, "ERROR: malloc failed for RunState! Need ~%zu MB\n",
-                ((size_t)p->num_layers * p->max_seq_len * kv_dim * 2 * 4) / (1024 * 1024));
+                ((size_t)p->num_layers * p->max_seq_len * kv_dim * 2 * 2) / (1024 * 1024));
         exit(EXIT_FAILURE);
     }
 }
@@ -605,7 +674,7 @@ void build_transformer(Transformer* t, const char* checkpoint_path) {
     }
 
     // Print memory usage
-    size_t kv_bytes = (size_t)p->num_layers * p->max_seq_len * t->kv_dim * 2 * sizeof(float);
+    size_t kv_bytes = (size_t)p->num_layers * p->max_seq_len * t->kv_dim * 2 * sizeof(uint16_t);
     size_t act_bytes = (p->hidden_size * 3 + t->qkv_dim + t->attn_out_dim +
                         p->num_heads * (p->max_seq_len + 1) + p->num_experts +
                         t->mlp1_out_dim + p->intermediate_size + p->hidden_size * 2 +
@@ -633,8 +702,8 @@ void free_transformer(Transformer* t) {
 
 void reset_kv_cache(Transformer* t) {
     size_t cache_size = (size_t)t->config.num_layers * t->config.max_seq_len * t->kv_dim;
-    memset(t->state.key_cache, 0, cache_size * sizeof(float));
-    memset(t->state.value_cache, 0, cache_size * sizeof(float));
+    memset(t->state.key_cache, 0, cache_size * sizeof(uint16_t));
+    memset(t->state.value_cache, 0, cache_size * sizeof(uint16_t));
 }
 
 // ============================================================================
@@ -693,22 +762,25 @@ float* forward(Transformer* transformer, int token, int pos, Metrics* metrics) {
                 qh[i + half_dim] = x2 * cos_row[i] + x1 * sin_row[i];
             }
         }
-        // Key heads (8 heads)
+        // 2d. Fused RoPE + KV cache store (K stays in registers, 1 pass instead of 3)
+        int loff = l * p->max_seq_len * kv_dim;
+        uint16_t* kcache_pos = s->key_cache + loff + pos * kv_dim;
         for (int h = 0; h < p->num_kv_heads; h++) {
             float* kh = k + h * head_dim;
+            uint16_t* kc = kcache_pos + h * head_dim;
             for (int i = 0; i < half_dim; i++) {
                 float x1 = kh[i], x2 = kh[i + half_dim];
-                kh[i]            = x1 * cos_row[i] - x2 * sin_row[i];
-                kh[i + half_dim] = x2 * cos_row[i] + x1 * sin_row[i];
+                float r1 = x1 * cos_row[i] - x2 * sin_row[i];
+                float r2 = x2 * cos_row[i] + x1 * sin_row[i];
+                kc[i]            = f32_to_f16(r1);
+                kc[i + half_dim] = f32_to_f16(r2);
             }
         }
-
-        // 2d. Store K, V in cache
-        int loff = l * p->max_seq_len * kv_dim;
-        float* kcache_pos = s->key_cache + loff + pos * kv_dim;
-        float* vcache_pos = s->value_cache + loff + pos * kv_dim;
-        memcpy(kcache_pos, k, kv_dim * sizeof(float));
-        memcpy(vcache_pos, v, kv_dim * sizeof(float));
+        // V: write directly to f16 cache (no RoPE needed)
+        uint16_t* vcache_pos = s->value_cache + loff + pos * kv_dim;
+        for (int j = 0; j < kv_dim; j++) {
+            vcache_pos[j] = f32_to_f16(v[j]);
+        }
 
         // 2e. Attention with sinks + sliding window
         // Even layers: sliding window (128), Odd layers: full attention
@@ -732,13 +804,30 @@ float* forward(Transformer* transformer, int token, int pos, Metrics* metrics) {
             float* att = s->att + h * (p->max_seq_len + 1);
             int num_keys = pos - start + 1;
 
-            // Compute QK dot products for positions in window
+            // Compute QK dot products for positions in window (f16 KV cache)
             for (int t = start; t <= pos; t++) {
-                float* kh = s->key_cache + loff + t * kv_dim + kv_h * head_dim;
+                uint16_t* kh = s->key_cache + loff + t * kv_dim + kv_h * head_dim;
                 float score = 0.0f;
-                for (int j = 0; j < head_dim; j++) {
-                    score += qh[j] * kh[j];
+#if USE_SIMD
+                // head_dim=64 → 8 iterations of 8-wide SIMD
+                __m256 dot_acc = _mm256_setzero_ps();
+                for (int j = 0; j < head_dim; j += 8) {
+                    __m128i kh8 = _mm_loadu_si128((__m128i*)(kh + j));
+                    __m256 kf = _mm256_cvtph_ps(kh8);
+                    __m256 qf = _mm256_loadu_ps(qh + j);
+                    dot_acc = _mm256_fmadd_ps(qf, kf, dot_acc);
                 }
+                __m128 dhi = _mm256_extractf128_ps(dot_acc, 1);
+                __m128 dlo = _mm256_castps256_ps128(dot_acc);
+                __m128 ds4 = _mm_add_ps(dlo, dhi);
+                ds4 = _mm_hadd_ps(ds4, ds4);
+                ds4 = _mm_hadd_ps(ds4, ds4);
+                score = _mm_cvtss_f32(ds4);
+#else
+                for (int j = 0; j < head_dim; j++) {
+                    score += qh[j] * f16_to_f32(kh[j]);
+                }
+#endif
                 att[t - start] = score * scale;
             }
 
@@ -752,11 +841,23 @@ float* forward(Transformer* transformer, int token, int pos, Metrics* metrics) {
             float* oh = s->attn_out + h * head_dim;
             memset(oh, 0, head_dim * sizeof(float));
             for (int t = start; t <= pos; t++) {
-                float* vh = s->value_cache + loff + t * kv_dim + kv_h * head_dim;
+                uint16_t* vh = s->value_cache + loff + t * kv_dim + kv_h * head_dim;
                 float a = att[t - start];
-                for (int j = 0; j < head_dim; j++) {
-                    oh[j] += a * vh[j];
+#if USE_SIMD
+                // head_dim=64 → 8 iterations of 8-wide SIMD
+                for (int j = 0; j < head_dim; j += 8) {
+                    __m128i vh8 = _mm_loadu_si128((__m128i*)(vh + j));
+                    __m256 vf = _mm256_cvtph_ps(vh8);
+                    __m256 av = _mm256_set1_ps(a);
+                    __m256 cur = _mm256_loadu_ps(oh + j);
+                    cur = _mm256_fmadd_ps(av, vf, cur);
+                    _mm256_storeu_ps(oh + j, cur);
                 }
+#else
+                for (int j = 0; j < head_dim; j++) {
+                    oh[j] += a * f16_to_f32(vh[j]);
+                }
+#endif
             }
         }
 
@@ -774,8 +875,9 @@ float* forward(Transformer* transformer, int token, int pos, Metrics* metrics) {
 
         // 2h. Router — expert selection
         //     gate_logits = xb @ gate_weight.T + gate_bias → (num_experts,)
-        f16_matmul_bias(s->gate_logits, s->xb, lw->gate_weight, lw->gate_bias,
-                        H, p->num_experts);
+        //     Serial: only 32 rows — OpenMP overhead exceeds compute
+        f16_matmul_bias_serial(s->gate_logits, s->xb, lw->gate_weight, lw->gate_bias,
+                               H, p->num_experts);
 
         // Top-k selection (k=4 from 32)
         int top_experts[4];
@@ -1508,6 +1610,10 @@ void chat_store_response(ChatState* cs, Tokenizer* t,
 
 int main(int argc, char* argv[]) {
 #ifdef _WIN32
+    // Pin to P-cores only (first 16 logical processors on i7-14700HX)
+    // 8 P-cores with HT = 16 threads at 4.9+ GHz, E-cores at 3.6 GHz cause stragglers
+    SetProcessAffinityMask(GetCurrentProcess(), 0x0000FFFF);
+    SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
     SetConsoleOutputCP(65001);
     SetConsoleCP(65001);
 
@@ -1535,6 +1641,7 @@ int main(int argc, char* argv[]) {
     int max_tokens = 512;
     char* prompt = NULL;
     int chat_mode = 0;
+    int quiet_mode = 0;
     unsigned long long rng_seed = 0;
     ReasoningLevel reasoning_level = REASONING_MEDIUM;
     int show_thinking = 0;
@@ -1556,6 +1663,7 @@ int main(int argc, char* argv[]) {
             else reasoning_level = REASONING_MEDIUM;
         }
         else if (strcmp(argv[i], "--show-thinking") == 0) { show_thinking = 1; }
+        else if (strcmp(argv[i], "--quiet") == 0) { quiet_mode = 1; }
         else {
             fprintf(stderr, "Unknown option: %s\n", argv[i]);
         }
@@ -1581,6 +1689,7 @@ int main(int argc, char* argv[]) {
     // Load model
     Transformer transformer;
     build_transformer(&transformer, model_path);
+    init_e8m0_luts();
 
     // Load tokenizer
     Tokenizer tokenizer;
@@ -1596,7 +1705,7 @@ int main(int argc, char* argv[]) {
     metrics.model_file_size = transformer.file_size;
     metrics.kv_cache_bytes = (size_t)transformer.config.num_layers *
                               transformer.config.max_seq_len *
-                              transformer.kv_dim * 2 * sizeof(float);
+                              transformer.kv_dim * 2 * sizeof(uint16_t);
     metrics.activation_bytes = (transformer.config.hidden_size * 3 +
                                 transformer.qkv_dim + transformer.attn_out_dim +
                                 transformer.config.num_heads * (transformer.config.max_seq_len + 1) +
@@ -1613,6 +1722,7 @@ int main(int argc, char* argv[]) {
         // Harmony chat mode — multi-channel structured output
         ChatState chat;
         chat_state_init(&chat, show_thinking, reasoning_level);
+        int chat_pos = 0;  // Persistent KV cache position across turns
 
         char input_buffer[2048];
         fprintf(stderr, "\n=== GPT-OSS 20B Chat (Harmony) ===\n");
@@ -1635,17 +1745,15 @@ int main(int argc, char* argv[]) {
             if (strcmp(input_buffer, "clear") == 0) {
                 chat_state_init(&chat, show_thinking, reasoning_level);
                 reset_kv_cache(&transformer);
+                chat_pos = 0;
                 fprintf(stderr, "[Conversation cleared]\n\n");
                 continue;
             }
             if (len == 0) continue;
 
-            // Re-process full history each turn (KV cache rebuilt)
-            reset_kv_cache(&transformer);
             memset(metrics.expert_hits, 0, sizeof(metrics.expert_hits));
 
             // Reset parser state for this turn
-            // Start in PARSE_IN_ROLE because prompt ends with <|start|>assistant
             chat.parse_state = PARSE_IN_ROLE;
             chat.current_channel = CHANNEL_NONE;
             chat.role_buf_len = 0;
@@ -1655,15 +1763,33 @@ int main(int argc, char* argv[]) {
             chat.analysis_printed_header = 0;
             chat.thinking_start_ms = 0;
 
-            // Build Harmony-formatted prompt
+            // Build Harmony-formatted prompt (persistent KV cache)
+            int history_before = chat.history_len;
             int n_prompt;
             chat_build_prompt(&chat, &tokenizer, input_buffer, prompt_tokens, &n_prompt);
-            metrics.prompt_tokens = n_prompt;
 
-            // Process prompt tokens (prefill)
-            metrics.prompt_start_ms = time_in_ms();
-            for (int pos = 0; pos < n_prompt; pos++) {
-                forward(&transformer, prompt_tokens[pos], pos, &metrics);
+            // Detect if history was truncated (overflow management)
+            int truncated = (n_prompt < history_before);
+            if (truncated || chat_pos == 0) {
+                // Full replay needed — reset KV cache
+                reset_kv_cache(&transformer);
+                chat_pos = 0;
+                metrics.prompt_tokens = n_prompt;
+                metrics.prompt_start_ms = time_in_ms();
+                for (int pos = 0; pos < n_prompt; pos++) {
+                    forward(&transformer, prompt_tokens[pos], pos, &metrics);
+                }
+                chat_pos = n_prompt;
+            } else {
+                // Incremental: only process NEW tokens (from chat_pos to end)
+                int new_start = history_before;
+                int n_new = n_prompt - new_start;
+                metrics.prompt_tokens = n_new;
+                metrics.prompt_start_ms = time_in_ms();
+                for (int i = 0; i < n_new; i++) {
+                    forward(&transformer, prompt_tokens[new_start + i], chat_pos + i, &metrics);
+                }
+                chat_pos += n_new;
             }
             metrics.prompt_end_ms = time_in_ms();
 
@@ -1675,7 +1801,7 @@ int main(int argc, char* argv[]) {
             metrics.gen_tokens = 0;
             float* logits = transformer.state.logits;
             int next_token = sample(&sampler, logits, vocab_size);
-            int pos = n_prompt;
+            int pos = chat_pos;  // Start from persistent KV position
 
             // Track generated tokens for history storage
             int* gen_tokens = (int*)malloc(transformer.config.max_seq_len * sizeof(int));
@@ -1708,6 +1834,7 @@ int main(int argc, char* argv[]) {
             }
 
             long gen_end = time_in_ms();
+            chat_pos = pos;  // Update persistent KV position
             fprintf(stdout, "\n");
 
             // Store assistant response in history (strip analysis, replace return→end)
@@ -1744,12 +1871,26 @@ int main(int argc, char* argv[]) {
         int next_token = sample(&sampler, logits, vocab_size);
         int pos = n_prompt;
 
+        // Buffer output in quiet mode to remove console I/O from timing
+        char* output_buf = NULL;
+        int out_len = 0;
+        if (quiet_mode) {
+            output_buf = (char*)malloc((size_t)max_tokens * 64);
+            out_len = 0;
+        }
+
         while (pos < transformer.config.max_seq_len && metrics.gen_tokens < max_tokens) {
             if (next_token == eos_id) break;
 
             char* piece = decode(&tokenizer, 0, next_token);
-            printf("%s", piece);
-            fflush(stdout);
+            if (quiet_mode) {
+                int plen = (int)strlen(piece);
+                memcpy(output_buf + out_len, piece, plen);
+                out_len += plen;
+            } else {
+                printf("%s", piece);
+                fflush(stdout);
+            }
 
             logits = forward(&transformer, next_token, pos, &metrics);
             next_token = sample(&sampler, logits, vocab_size);
@@ -1758,7 +1899,13 @@ int main(int argc, char* argv[]) {
         }
 
         long gen_end = time_in_ms();
-        printf("\n");
+        if (quiet_mode) {
+            output_buf[out_len] = '\0';
+            printf("%s\n", output_buf);
+            free(output_buf);
+        } else {
+            printf("\n");
+        }
         print_metrics(&metrics, gen_end);
     } else {
         fprintf(stderr, "Please specify --prompt or --chat\n");
