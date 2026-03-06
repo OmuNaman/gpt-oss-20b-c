@@ -346,7 +346,7 @@ static void* aligned_calloc(size_t count, size_t size) {
     if (p) memset(p, 0, total);
 #else
     void* p = NULL;
-    posix_memalign(&p, 32, total);
+    if (posix_memalign(&p, 32, total) != 0) p = NULL;
     if (p) memset(p, 0, total);
 #endif
     return p;
