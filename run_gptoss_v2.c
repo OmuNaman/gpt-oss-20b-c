@@ -1,8 +1,17 @@
 /*
- * run_gptoss.c — GPT-OSS 20B C inference engine
+ * run_gptoss_v2.c — GPT-OSS 20B C inference engine (ULTRA-OPTIMIZED)
  *
  * Built from scratch for OpenAI GPT-OSS 20B (Mixture of Experts).
  * 20.9B total params, 3.6B active per token.
+ *
+ * Optimizations over baseline:
+ *   - P-Core thread pinning (avoid E-Core stragglers)
+ *   - Software prefetching in matmul hot loops
+ *   - 2x accumulator unrolling in f16 matmul
+ *   - vpshufb MXFP4 parallel LUT lookup
+ *   - Fast polynomial exp() in SwiGLU (replaces expf)
+ *   - Fused RoPE + KV cache store (eliminates extra memcpy)
+ *   - OpenMP parallel SwiGLU
  *
  * Architecture:
  *   - 24 layers, hidden_dim=2880, head_dim=64
@@ -42,6 +51,23 @@
 #else
 #define USE_SIMD 0
 #endif
+
+// ============================================================================
+// P-Core Thread Pinning (Hybrid CPU Optimization)
+// ============================================================================
+
+// Pin threads exclusively to Performance Cores (P-Cores) to avoid E-Core stragglers.
+// On i7-14700HX: first 16 logical processors = 8 HT P-Cores, remaining 12 = E-Cores.
+static void optimize_thread_affinity(void) {
+#ifdef _WIN32
+    DWORD_PTR pcore_mask = 0x0000FFFF; // First 16 logical processors (8 P-Cores w/ HT)
+    SetProcessAffinityMask(GetCurrentProcess(), pcore_mask);
+    SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
+#endif
+    // Warm up the thread pool
+    #pragma omp parallel
+    { }
+}
 
 // ============================================================================
 // Section 1: Float16 conversion
@@ -139,20 +165,30 @@ static void softmax(float* x, int size) {
 // Float16 matrix-vector multiply: out = W @ x  (W is float16, x is float32)
 // W is (d, n) row-major, x is (n,), out is (d,)
 static void f16_matmul(float* out, const float* x, const uint16_t* w, int n, int d) {
-    #pragma omp parallel for
+    #pragma omp parallel for schedule(dynamic, 16)
     for (int i = 0; i < d; i++) {
         const uint16_t* wi = w + (size_t)i * n;
-#if USE_SIMD
-        __m256 acc = _mm256_setzero_ps();
-        int j;
-        for (j = 0; j + 7 < n; j += 8) {
-            __m128i h8 = _mm_loadu_si128((__m128i*)(wi + j));
-            __m256 w8 = _mm256_cvtph_ps(h8);
-            __m256 x8 = _mm256_loadu_ps(x + j);
-            acc = _mm256_fmadd_ps(w8, x8, acc);
+        // Prefetch next row into L1 cache
+        if (i + 1 < d) {
+            _mm_prefetch((const char*)(w + (size_t)(i + 1) * n), _MM_HINT_T0);
         }
-        __m128 hi = _mm256_extractf128_ps(acc, 1);
-        __m128 lo = _mm256_castps256_ps128(acc);
+#if USE_SIMD
+        __m256 acc0 = _mm256_setzero_ps();
+        __m256 acc1 = _mm256_setzero_ps();
+        int j;
+        for (j = 0; j + 15 < n; j += 16) {
+            __m256 w8_0 = _mm256_cvtph_ps(_mm_loadu_si128((__m128i*)(wi + j)));
+            __m256 w8_1 = _mm256_cvtph_ps(_mm_loadu_si128((__m128i*)(wi + j + 8)));
+            acc0 = _mm256_fmadd_ps(w8_0, _mm256_loadu_ps(x + j), acc0);
+            acc1 = _mm256_fmadd_ps(w8_1, _mm256_loadu_ps(x + j + 8), acc1);
+        }
+        acc0 = _mm256_add_ps(acc0, acc1);
+        for (; j + 7 < n; j += 8) {
+            __m256 w8 = _mm256_cvtph_ps(_mm_loadu_si128((__m128i*)(wi + j)));
+            acc0 = _mm256_fmadd_ps(w8, _mm256_loadu_ps(x + j), acc0);
+        }
+        __m128 hi = _mm256_extractf128_ps(acc0, 1);
+        __m128 lo = _mm256_castps256_ps128(acc0);
         __m128 s4 = _mm_add_ps(lo, hi);
         s4 = _mm_hadd_ps(s4, s4);
         s4 = _mm_hadd_ps(s4, s4);
@@ -172,32 +208,42 @@ static void f16_matmul(float* out, const float* x, const uint16_t* w, int n, int
 // Float16 matrix-vector multiply with float16 bias
 static void f16_matmul_bias(float* out, const float* x, const uint16_t* w,
                              const uint16_t* bias, int n, int d) {
-    #pragma omp parallel for
+    #pragma omp parallel for schedule(dynamic, 16)
     for (int i = 0; i < d; i++) {
         const uint16_t* wi = w + (size_t)i * n;
-#if USE_SIMD
-        __m256 acc = _mm256_setzero_ps();
-        int j;
-        for (j = 0; j + 7 < n; j += 8) {
-            __m128i h8 = _mm_loadu_si128((__m128i*)(wi + j));
-            __m256 w8 = _mm256_cvtph_ps(h8);
-            __m256 x8 = _mm256_loadu_ps(x + j);
-            acc = _mm256_fmadd_ps(w8, x8, acc);
+        // Prefetch next row into L1 cache
+        if (i + 1 < d) {
+            _mm_prefetch((const char*)(w + (size_t)(i + 1) * n), _MM_HINT_T0);
         }
-        __m128 hi = _mm256_extractf128_ps(acc, 1);
-        __m128 lo = _mm256_castps256_ps128(acc);
+#if USE_SIMD
+        __m256 acc0 = _mm256_setzero_ps();
+        __m256 acc1 = _mm256_setzero_ps();
+        int j;
+        for (j = 0; j + 15 < n; j += 16) {
+            __m256 w8_0 = _mm256_cvtph_ps(_mm_loadu_si128((__m128i*)(wi + j)));
+            __m256 w8_1 = _mm256_cvtph_ps(_mm_loadu_si128((__m128i*)(wi + j + 8)));
+            acc0 = _mm256_fmadd_ps(w8_0, _mm256_loadu_ps(x + j), acc0);
+            acc1 = _mm256_fmadd_ps(w8_1, _mm256_loadu_ps(x + j + 8), acc1);
+        }
+        acc0 = _mm256_add_ps(acc0, acc1);
+        for (; j + 7 < n; j += 8) {
+            __m256 w8 = _mm256_cvtph_ps(_mm_loadu_si128((__m128i*)(wi + j)));
+            acc0 = _mm256_fmadd_ps(w8, _mm256_loadu_ps(x + j), acc0);
+        }
+        __m128 hi = _mm256_extractf128_ps(acc0, 1);
+        __m128 lo = _mm256_castps256_ps128(acc0);
         __m128 s4 = _mm_add_ps(lo, hi);
         s4 = _mm_hadd_ps(s4, s4);
         s4 = _mm_hadd_ps(s4, s4);
         float val = _mm_cvtss_f32(s4);
         for (; j < n; j++) val += f16_to_f32(wi[j]) * x[j];
-        out[i] = val + f16_to_f32(bias[i]);
+        out[i] = val + (bias ? f16_to_f32(bias[i]) : 0.0f);
 #else
         float val = 0.0f;
         for (int j = 0; j < n; j++) {
             val += f16_to_f32(wi[j]) * x[j];
         }
-        out[i] = val + f16_to_f32(bias[i]);
+        out[i] = val + (bias ? f16_to_f32(bias[i]) : 0.0f);
 #endif
     }
 }
@@ -226,6 +272,11 @@ static inline float mxfp4_dot_row(const uint8_t* blocks, const uint8_t* scales,
 
     __m256 total_acc = _mm256_setzero_ps();
     for (int g = 0; g < n_groups; g++) {
+        // Prefetch 2 groups ahead to hide DDR5 latency
+        if (g + 2 < n_groups) {
+            _mm_prefetch((const char*)(blocks + (g + 2) * 16), _MM_HINT_T0);
+        }
+
         float scale = ldexpf(1.0f, (int)scales[g] - 128);  // -128 absorbs the 2x LUT encoding
         __m256 scale_v = _mm256_set1_ps(scale);
         const uint8_t* gb = blocks + g * 16;
@@ -246,16 +297,13 @@ static inline float mxfp4_dot_row(const uint8_t* blocks, const uint8_t* scales,
         __m128i pairs_lo = _mm_unpacklo_epi8(lo_i8, hi_i8);  // values 0-15
         __m128i pairs_hi = _mm_unpackhi_epi8(lo_i8, hi_i8);  // values 16-31
 
-        // Convert int8→float32 and FMA with input (2 accumulators hide FMA latency)
-        __m256 ga0 = _mm256_setzero_ps();
-        __m256 ga1 = _mm256_setzero_ps();
-
-        ga0 = _mm256_fmadd_ps(
+        // Convert int8→float32 and FMA with input (mul for first, fmadd for rest)
+        __m256 ga0 = _mm256_mul_ps(
             _mm256_cvtepi32_ps(_mm256_cvtepi8_epi32(pairs_lo)),
-            _mm256_loadu_ps(gx), ga0);
-        ga1 = _mm256_fmadd_ps(
+            _mm256_loadu_ps(gx));
+        __m256 ga1 = _mm256_mul_ps(
             _mm256_cvtepi32_ps(_mm256_cvtepi8_epi32(_mm_srli_si128(pairs_lo, 8))),
-            _mm256_loadu_ps(gx + 8), ga1);
+            _mm256_loadu_ps(gx + 8));
         ga0 = _mm256_fmadd_ps(
             _mm256_cvtepi32_ps(_mm256_cvtepi8_epi32(pairs_hi)),
             _mm256_loadu_ps(gx + 16), ga0);
@@ -263,8 +311,7 @@ static inline float mxfp4_dot_row(const uint8_t* blocks, const uint8_t* scales,
             _mm256_cvtepi32_ps(_mm256_cvtepi8_epi32(_mm_srli_si128(pairs_hi, 8))),
             _mm256_loadu_ps(gx + 24), ga1);
 
-        __m256 group_sum = _mm256_add_ps(ga0, ga1);
-        total_acc = _mm256_fmadd_ps(group_sum, scale_v, total_acc);
+        total_acc = _mm256_fmadd_ps(_mm256_add_ps(ga0, ga1), scale_v, total_acc);
     }
     // Horizontal sum
     __m128 hi = _mm256_extractf128_ps(total_acc, 1);
@@ -299,8 +346,13 @@ static void mxfp4_matmul_bias(float* out, const float* x,
                                 const uint16_t* bias,
                                 int in_dim, int out_dim,
                                 int packed_cols, int n_groups) {
-    #pragma omp parallel for
+    #pragma omp parallel for schedule(dynamic, 8)
     for (int i = 0; i < out_dim; i++) {
+        // Prefetch row data 2 rows ahead to hide DDR5 latency
+        if (i + 2 < out_dim) {
+            _mm_prefetch((const char*)(blocks + (size_t)(i + 2) * packed_cols), _MM_HINT_T0);
+            _mm_prefetch((const char*)(scales + (size_t)(i + 2) * n_groups), _MM_HINT_T0);
+        }
         const uint8_t* row_blocks = blocks + (size_t)i * packed_cols;
         const uint8_t* row_scales = scales + (size_t)i * n_groups;
         out[i] = mxfp4_dot_row(row_blocks, row_scales, x, n_groups)
@@ -315,18 +367,26 @@ static void mxfp4_matmul_bias(float* out, const float* x,
 // GPT-OSS SwiGLU: interleaved gate+linear in mlp1 output
 //   h = [gate_0, linear_0, gate_1, linear_1, ...]  (size = 2 * intermediate_size)
 //   out[i] = clamp(gate) * sigmoid(1.702 * clamp(gate)) * (clamp(linear) + 1.0)
+// Uses fast polynomial exp approximation: (1 + x/256)^256 ≈ exp(x)
 static void swiglu(float* out, const float* h, int intermediate_size) {
+    #pragma omp parallel for
     for (int i = 0; i < intermediate_size; i++) {
         float gate   = h[2 * i];       // even indices
         float linear = h[2 * i + 1];   // odd indices
 
-        // Clamp: gate max=7, linear [-7, 7]
-        if (gate > 7.0f) gate = 7.0f;
+        // Symmetric clamp for numerical stability with fast exp
+        if (gate > 7.0f) gate = 7.0f; else if (gate < -7.0f) gate = -7.0f;
         if (linear < -7.0f) linear = -7.0f;
         if (linear >  7.0f) linear =  7.0f;
 
-        // gate_act = gate * sigmoid(1.702 * gate)
-        float gate_act = gate * (1.0f / (1.0f + expf(-1.702f * gate)));
+        // Fast exp(-1.702 * gate) via (1 + x/256)^256 approximation
+        // 8 squarings = 2^8 = 256th power
+        float ex = -1.702f * gate;
+        ex = 1.0f + ex / 256.0f;
+        ex *= ex; ex *= ex; ex *= ex; ex *= ex;
+        ex *= ex; ex *= ex; ex *= ex; ex *= ex;
+
+        float gate_act = gate * (1.0f / (1.0f + ex));
         out[i] = gate_act * (linear + 1.0f);
     }
 }
@@ -684,7 +744,7 @@ float* forward(Transformer* transformer, int token, int pos, Metrics* metrics) {
         // 2c. Apply RoPE (half-split, precomputed tables)
         float* cos_row = transformer->rope_cos + pos * half_dim;
         float* sin_row = transformer->rope_sin + pos * half_dim;
-        // Query heads (64 heads)
+        // Query heads (64 heads) — RoPE in-place
         for (int h = 0; h < p->num_heads; h++) {
             float* qh = q + h * head_dim;
             for (int i = 0; i < half_dim; i++) {
@@ -693,22 +753,28 @@ float* forward(Transformer* transformer, int token, int pos, Metrics* metrics) {
                 qh[i + half_dim] = x2 * cos_row[i] + x1 * sin_row[i];
             }
         }
-        // Key heads (8 heads)
-        for (int h = 0; h < p->num_kv_heads; h++) {
-            float* kh = k + h * head_dim;
-            for (int i = 0; i < half_dim; i++) {
-                float x1 = kh[i], x2 = kh[i + half_dim];
-                kh[i]            = x1 * cos_row[i] - x2 * sin_row[i];
-                kh[i + half_dim] = x2 * cos_row[i] + x1 * sin_row[i];
-            }
-        }
 
-        // 2d. Store K, V in cache
+        // 2d. FUSED: Apply RoPE to K + store K,V directly to cache
+        // Avoids writing K to qkv buffer then memcpy'ing — saves one L1→RAM roundtrip
         int loff = l * p->max_seq_len * kv_dim;
         float* kcache_pos = s->key_cache + loff + pos * kv_dim;
         float* vcache_pos = s->value_cache + loff + pos * kv_dim;
-        memcpy(kcache_pos, k, kv_dim * sizeof(float));
-        memcpy(vcache_pos, v, kv_dim * sizeof(float));
+
+        for (int h = 0; h < p->num_kv_heads; h++) {
+            float* kh = k + h * head_dim;
+            float* k_dst = kcache_pos + h * head_dim;
+            float* vh = v + h * head_dim;
+            float* v_dst = vcache_pos + h * head_dim;
+            for (int i = 0; i < half_dim; i++) {
+                float x1 = kh[i], x2 = kh[i + half_dim];
+                // RoPE + write directly to KV cache
+                k_dst[i]            = x1 * cos_row[i] - x2 * sin_row[i];
+                k_dst[i + half_dim] = x2 * cos_row[i] + x1 * sin_row[i];
+                // Store V alongside
+                v_dst[i]            = vh[i];
+                v_dst[i + half_dim] = vh[i + half_dim];
+            }
+        }
 
         // 2e. Attention with sinks + sliding window
         // Even layers: sliding window (128), Odd layers: full attention
@@ -1507,6 +1573,9 @@ void chat_store_response(ChatState* cs, Tokenizer* t,
 #ifndef NO_MAIN
 
 int main(int argc, char* argv[]) {
+    // Pin threads to P-Cores and set high priority
+    optimize_thread_affinity();
+
 #ifdef _WIN32
     SetConsoleOutputCP(65001);
     SetConsoleCP(65001);
