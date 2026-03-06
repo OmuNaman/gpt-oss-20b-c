@@ -17,3 +17,11 @@ Thumbs.db
 
 # HuggingFace cache
 .cache/
+
+# Downloaded model weights (different formats)
+gpt-oss-20b-gguf/
+gpt-oss-20b-safetensors/
+
+# Cloned competitor repos
+gpt-oss-java/
+llama.cpp/

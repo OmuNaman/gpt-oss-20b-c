@@ -1,0 +1,29 @@
+﻿=== GPT-OSS 20B Benchmark - System Info ===
+Date: 2026-03-06 14:04:10
+Computer: OMUNAMAN
+OS: Microsoft Windows 11 Home Single Language Build 26200
+CPU: Intel(R) Core(TM) i7-14700HX
+Cores (Physical): 20
+Threads (Logical): 28
+Max Clock: 2100 MHz
+RAM: 15.7 GB
+
+=== Tool Versions ===
+GCC: gcc.exe (MinGW-W64 x86_64-ucrt-posix-seh, built by Brecht Sanders, r5) 15.2.0
+CMake: cmake version 4.2.1
+Java: NOT INSTALLED
+
+=== CPU Details ===
+
+
+Name         : Intel(R) Core(TM) i7-14700HX
+Caption      : Intel64 Family 6 Model 183 Stepping 1
+Architecture : 9
+L2CacheSize  : 28672
+L3CacheSize  : 33792
+
+
+
+
+Available RAM (now): 7.4 GB
+Java: openjdk version "23.0.2" 2025-01-21

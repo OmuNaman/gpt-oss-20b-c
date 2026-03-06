@@ -1,0 +1,6 @@
+﻿=== run_gptoss.c (-march=native) ===
+Date: 03/06/2026 15:40:05
+Prompt: Explain the halting problem in one paragraph.
+Max tokens: 256, Temp: 0, Seed: 42
+
+--- Run warmup ---
