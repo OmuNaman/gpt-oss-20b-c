@@ -1,0 +1,119 @@
+﻿=== gpt-oss.java Benchmark ===
+Date: 03/06/2026 16:02:38
+Prompt: Explain the halting problem in one paragraph.
+Max tokens: 256, Temp: 0, Heap: -Xmx14g
+
+--- Run warmup ---
+java.exe : WARNING: Using incubator modules: jdk.incubator.vector
+At D:\Coding_Workspace\GPT_OSS\benchmark_results\run_java_benchmark.ps1:22 char:19
++ ...   $output = & java -Xmx14g --add-modules jdk.incubator.vector -jar $j ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: Using ...ncubator.vector:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Loading model from D:\Coding_Workspace\GPT_OSS\gpt-oss-20b-safetensors\original\model.safetensors
+Input: Explain the halting problem in one paragraph.
+Encoded tokens: [176289, 290, 4039, 1744, 4792, 306, 1001, 27853, 13]
+Processing prompt with 9 tokens...
+
+--- Performance Metrics ---
+Prefill: 9 tokens in 4.382 seconds (2.054 tokens/s)
+Generate: 0 tokens in 0.282 seconds (0.000 tokens/s)
+
+Wall time: 13.345813 seconds
+
+--- Run 1 ---
+java.exe : WARNING: Using incubator modules: jdk.incubator.vector
+At D:\Coding_Workspace\GPT_OSS\benchmark_results\run_java_benchmark.ps1:22 char:19
++ ...   $output = & java -Xmx14g --add-modules jdk.incubator.vector -jar $j ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: Using ...ncubator.vector:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Loading model from D:\Coding_Workspace\GPT_OSS\gpt-oss-20b-safetensors\original\model.safetensors
+Input: Explain the halting problem in one paragraph.
+Encoded tokens: [176289, 290, 4039, 1744, 4792, 306, 1001, 27853, 13]
+Processing prompt with 9 tokens...
+
+--- Performance Metrics ---
+Prefill: 9 tokens in 4.351 seconds (2.069 tokens/s)
+Generate: 0 tokens in 0.160 seconds (0.000 tokens/s)
+
+Wall time: 12.1113416 seconds
+
+--- Run 2 ---
+java.exe : WARNING: Using incubator modules: jdk.incubator.vector
+At D:\Coding_Workspace\GPT_OSS\benchmark_results\run_java_benchmark.ps1:22 char:19
++ ...   $output = & java -Xmx14g --add-modules jdk.incubator.vector -jar $j ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: Using ...ncubator.vector:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Loading model from D:\Coding_Workspace\GPT_OSS\gpt-oss-20b-safetensors\original\model.safetensors
+Input: Explain the halting problem in one paragraph.
+Encoded tokens: [176289, 290, 4039, 1744, 4792, 306, 1001, 27853, 13]
+Processing prompt with 9 tokens...
+
+--- Performance Metrics ---
+Prefill: 9 tokens in 4.036 seconds (2.230 tokens/s)
+Generate: 0 tokens in 0.302 seconds (0.000 tokens/s)
+
+Wall time: 10.8916041 seconds
+
+--- Run 3 ---
+java.exe : WARNING: Using incubator modules: jdk.incubator.vector
+At D:\Coding_Workspace\GPT_OSS\benchmark_results\run_java_benchmark.ps1:22 char:19
++ ...   $output = & java -Xmx14g --add-modules jdk.incubator.vector -jar $j ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: Using ...ncubator.vector:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Loading model from D:\Coding_Workspace\GPT_OSS\gpt-oss-20b-safetensors\original\model.safetensors
+Input: Explain the halting problem in one paragraph.
+Encoded tokens: [176289, 290, 4039, 1744, 4792, 306, 1001, 27853, 13]
+Processing prompt with 9 tokens...
+
+--- Performance Metrics ---
+Prefill: 9 tokens in 4.406 seconds (2.043 tokens/s)
+Generate: 0 tokens in 0.161 seconds (0.000 tokens/s)
+
+Wall time: 12.0016644 seconds
+
+--- Run 4 ---
+java.exe : WARNING: Using incubator modules: jdk.incubator.vector
+At D:\Coding_Workspace\GPT_OSS\benchmark_results\run_java_benchmark.ps1:22 char:19
++ ...   $output = & java -Xmx14g --add-modules jdk.incubator.vector -jar $j ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: Using ...ncubator.vector:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Loading model from D:\Coding_Workspace\GPT_OSS\gpt-oss-20b-safetensors\original\model.safetensors
+Input: Explain the halting problem in one paragraph.
+Encoded tokens: [176289, 290, 4039, 1744, 4792, 306, 1001, 27853, 13]
+Processing prompt with 9 tokens...
+
+--- Performance Metrics ---
+Prefill: 9 tokens in 5.061 seconds (1.778 tokens/s)
+Generate: 0 tokens in 0.402 seconds (0.000 tokens/s)
+
+Wall time: 12.8029299 seconds
+
+--- Run 5 ---
+java.exe : WARNING: Using incubator modules: jdk.incubator.vector
+At D:\Coding_Workspace\GPT_OSS\benchmark_results\run_java_benchmark.ps1:22 char:19
++ ...   $output = & java -Xmx14g --add-modules jdk.incubator.vector -jar $j ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: Using ...ncubator.vector:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Loading model from D:\Coding_Workspace\GPT_OSS\gpt-oss-20b-safetensors\original\model.safetensors
+Input: Explain the halting problem in one paragraph.
+Encoded tokens: [176289, 290, 4039, 1744, 4792, 306, 1001, 27853, 13]
+Processing prompt with 9 tokens...
+
+--- Performance Metrics ---
+Prefill: 9 tokens in 5.608 seconds (1.605 tokens/s)
+Generate: 0 tokens in 0.338 seconds (0.000 tokens/s)
+
+Wall time: 12.9887864 seconds
+

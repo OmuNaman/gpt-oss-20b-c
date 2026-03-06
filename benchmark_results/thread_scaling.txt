@@ -1,0 +1,231 @@
+=== C Engine Thread Scaling ===
+Date: Fri Mar  6 16:41:10 IST 2026
+Max tokens: 64, Temp: 0, Seed: 42
+
+--- OMP_NUM_THREADS=1 ---
+=== GPT-OSS 20B Configuration ===
+  hidden_size       = 2880
+  intermediate_size = 2880
+  num_layers        = 24
+  num_heads         = 64 (query)
+  num_kv_heads      = 8 (GQA 8:1)
+  head_dim          = 64
+  vocab_size        = 201088
+  num_experts       = 32 (top-4 active)
+  sliding_window    = 128
+  max_seq_len       = 4096
+  rope_theta        = 150000
+  eos_token_id      = 200002
+  qkv_dim           = 5120
+  attn_out_dim      = 4096
+  kv_dim            = 512
+  mlp1_out_dim      = 5760 (SwiGLU interleaved)
+  MXFP4 groups      = 90 (group_size=32)
+  Model file size   = 12.82 GB
+  RoPE tables       = 1024.0 KB
+
+=== Memory Usage ===
+  Model (mmap'd)    = 12.82 GB
+  KV cache          = 384.0 MB
+  Activations       = 1.9 MB
+  Total RAM alloc   = 385.9 MB
+================================
+
+Tokenizer loaded: 201088 tokens, max_len=128, eos=200002
+Prompt: "Explain the halting problem in one paragraph." (9 tokens)
+
+ The halting problem is a decision problem that asks whether a given program will halt or run forever. It is a fundamental problem in computer science and has been proven to be undecidable. This means that there is no algorithm that can solve the problem for all possible inputs. The halting problem is a classic example of a
+=== Performance Metrics ===
+  Model size (disk)     = 12.82 GB
+  KV cache              = 384.0 MB
+  Activation buffers    = 1.9 MB
+  Active params/token   = ~3.6B
+  Prompt tokens         = 9
+  Prompt time           = 23.30 s
+  Prompt speed          = 0.4 tok/s
+  Generated tokens      = 64
+  Generation time       = 82.35 s
+  Generation speed      = 0.78 tok/s
+  Time per token        = 1287 ms
+  Total tokens          = 73
+  Total time            = 105.65 s
+
+  Expert utilization (top 5):
+    Expert 24: 368 selections
+    Expert  0: 317 selections
+    Expert  6: 302 selections
+    Expert 21: 290 selections
+    Expert 27: 279 selections
+===========================
+
+
+--- OMP_NUM_THREADS=4 ---
+=== GPT-OSS 20B Configuration ===
+  hidden_size       = 2880
+  intermediate_size = 2880
+  num_layers        = 24
+  num_heads         = 64 (query)
+  num_kv_heads      = 8 (GQA 8:1)
+  head_dim          = 64
+  vocab_size        = 201088
+  num_experts       = 32 (top-4 active)
+  sliding_window    = 128
+  max_seq_len       = 4096
+  rope_theta        = 150000
+  eos_token_id      = 200002
+  qkv_dim           = 5120
+  attn_out_dim      = 4096
+  kv_dim            = 512
+  mlp1_out_dim      = 5760 (SwiGLU interleaved)
+  MXFP4 groups      = 90 (group_size=32)
+  Model file size   = 12.82 GB
+  RoPE tables       = 1024.0 KB
+
+=== Memory Usage ===
+  Model (mmap'd)    = 12.82 GB
+  KV cache          = 384.0 MB
+  Activations       = 1.9 MB
+  Total RAM alloc   = 385.9 MB
+================================
+
+Tokenizer loaded: 201088 tokens, max_len=128, eos=200002
+Prompt: "Explain the halting problem in one paragraph." (9 tokens)
+
+ The halting problem is a decision problem that asks whether a given program will halt or run forever. It is a fundamental problem in computer science and has been proven to be undecidable. This means that there is no algorithm that can solve the problem for all possible inputs. The halting problem is a classic example of a
+=== Performance Metrics ===
+  Model size (disk)     = 12.82 GB
+  KV cache              = 384.0 MB
+  Activation buffers    = 1.9 MB
+  Active params/token   = ~3.6B
+  Prompt tokens         = 9
+  Prompt time           = 5.15 s
+  Prompt speed          = 1.7 tok/s
+  Generated tokens      = 64
+  Generation time       = 28.09 s
+  Generation speed      = 2.28 tok/s
+  Time per token        = 439 ms
+  Total tokens          = 73
+  Total time            = 33.24 s
+
+  Expert utilization (top 5):
+    Expert 24: 368 selections
+    Expert  0: 317 selections
+    Expert  6: 302 selections
+    Expert 21: 290 selections
+    Expert 27: 279 selections
+===========================
+
+
+--- OMP_NUM_THREADS=8 ---
+=== GPT-OSS 20B Configuration ===
+  hidden_size       = 2880
+  intermediate_size = 2880
+  num_layers        = 24
+  num_heads         = 64 (query)
+  num_kv_heads      = 8 (GQA 8:1)
+  head_dim          = 64
+  vocab_size        = 201088
+  num_experts       = 32 (top-4 active)
+  sliding_window    = 128
+  max_seq_len       = 4096
+  rope_theta        = 150000
+  eos_token_id      = 200002
+  qkv_dim           = 5120
+  attn_out_dim      = 4096
+  kv_dim            = 512
+  mlp1_out_dim      = 5760 (SwiGLU interleaved)
+  MXFP4 groups      = 90 (group_size=32)
+  Model file size   = 12.82 GB
+  RoPE tables       = 1024.0 KB
+
+=== Memory Usage ===
+  Model (mmap'd)    = 12.82 GB
+  KV cache          = 384.0 MB
+  Activations       = 1.9 MB
+  Total RAM alloc   = 385.9 MB
+================================
+
+Tokenizer loaded: 201088 tokens, max_len=128, eos=200002
+Prompt: "Explain the halting problem in one paragraph." (9 tokens)
+
+ The halting problem is a decision problem that asks whether a given program will halt or run forever. It is a fundamental problem in computer science and has been proven to be undecidable. This means that there is no algorithm that can solve the problem for all possible inputs. The halting problem is a classic example of a
+=== Performance Metrics ===
+  Model size (disk)     = 12.82 GB
+  KV cache              = 384.0 MB
+  Activation buffers    = 1.9 MB
+  Active params/token   = ~3.6B
+  Prompt tokens         = 9
+  Prompt time           = 4.75 s
+  Prompt speed          = 1.9 tok/s
+  Generated tokens      = 64
+  Generation time       = 19.70 s
+  Generation speed      = 3.25 tok/s
+  Time per token        = 308 ms
+  Total tokens          = 73
+  Total time            = 24.45 s
+
+  Expert utilization (top 5):
+    Expert 24: 368 selections
+    Expert  0: 317 selections
+    Expert  6: 302 selections
+    Expert 21: 290 selections
+    Expert 27: 279 selections
+===========================
+
+
+--- OMP_NUM_THREADS=16 ---
+=== GPT-OSS 20B Configuration ===
+  hidden_size       = 2880
+  intermediate_size = 2880
+  num_layers        = 24
+  num_heads         = 64 (query)
+  num_kv_heads      = 8 (GQA 8:1)
+  head_dim          = 64
+  vocab_size        = 201088
+  num_experts       = 32 (top-4 active)
+  sliding_window    = 128
+  max_seq_len       = 4096
+  rope_theta        = 150000
+  eos_token_id      = 200002
+  qkv_dim           = 5120
+  attn_out_dim      = 4096
+  kv_dim            = 512
+  mlp1_out_dim      = 5760 (SwiGLU interleaved)
+  MXFP4 groups      = 90 (group_size=32)
+  Model file size   = 12.82 GB
+  RoPE tables       = 1024.0 KB
+
+=== Memory Usage ===
+  Model (mmap'd)    = 12.82 GB
+  KV cache          = 384.0 MB
+  Activations       = 1.9 MB
+  Total RAM alloc   = 385.9 MB
+================================
+
+Tokenizer loaded: 201088 tokens, max_len=128, eos=200002
+Prompt: "Explain the halting problem in one paragraph." (9 tokens)
+
+ The halting problem is a decision problem that asks whether a given program will halt or run forever. It is a fundamental problem in computer science and has been proven to be undecidable. This means that there is no algorithm that can solve the problem for all possible inputs. The halting problem is a classic example of a
+=== Performance Metrics ===
+  Model size (disk)     = 12.82 GB
+  KV cache              = 384.0 MB
+  Activation buffers    = 1.9 MB
+  Active params/token   = ~3.6B
+  Prompt tokens         = 9
+  Prompt time           = 4.50 s
+  Prompt speed          = 2.0 tok/s
+  Generated tokens      = 64
+  Generation time       = 27.38 s
+  Generation speed      = 2.34 tok/s
+  Time per token        = 428 ms
+  Total tokens          = 73
+  Total time            = 31.88 s
+
+  Expert utilization (top 5):
+    Expert 24: 368 selections
+    Expert  0: 317 selections
+    Expert  6: 302 selections
+    Expert 21: 290 selections
+    Expert 27: 279 selections
+===========================
+

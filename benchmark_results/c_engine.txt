@@ -1,6 +1,370 @@
-﻿=== run_gptoss.c (-march=native) ===
-Date: 03/06/2026 15:40:05
+=== C Engine Benchmark ===
+Date: Fri Mar  6 15:51:18 IST 2026
 Prompt: Explain the halting problem in one paragraph.
 Max tokens: 256, Temp: 0, Seed: 42
 
---- Run warmup ---
+--- Run: warmup ---
+=== GPT-OSS 20B Configuration ===
+  hidden_size       = 2880
+  intermediate_size = 2880
+  num_layers        = 24
+  num_heads         = 64 (query)
+  num_kv_heads      = 8 (GQA 8:1)
+  head_dim          = 64
+  vocab_size        = 201088
+  num_experts       = 32 (top-4 active)
+  sliding_window    = 128
+  max_seq_len       = 4096
+  rope_theta        = 150000
+  eos_token_id      = 200002
+  qkv_dim           = 5120
+  attn_out_dim      = 4096
+  kv_dim            = 512
+  mlp1_out_dim      = 5760 (SwiGLU interleaved)
+  MXFP4 groups      = 90 (group_size=32)
+  Model file size   = 12.82 GB
+  RoPE tables       = 1024.0 KB
+
+=== Memory Usage ===
+  Model (mmap'd)    = 12.82 GB
+  KV cache          = 384.0 MB
+  Activations       = 1.9 MB
+  Total RAM alloc   = 385.9 MB
+================================
+
+Tokenizer loaded: 201088 tokens, max_len=128, eos=200002
+Prompt: "Explain the halting problem in one paragraph." (9 tokens)
+
+ The halting problem is a decision problem that asks whether a given program will halt or run forever. It is a fundamental problem in computer science and has been proven to be undecidable. This means that there is no algorithm that can solve the problem for all possible inputs. The halting problem is a classic example of a self-referential problem, where the program is a function that can be used to create a function that is not well-defined. The halting problem is a problem that is difficult to solve because it is a problem that is not well-defined. The problem is also a
+
+The halting problem is a decision problem that asks whether a given program will halt or run forever. It is a fundamental problem in computer science and has been proven to be undecidable. This means that there is no algorithm that can solve the problem for all possible inputs. The halting problem is a classic example of a self-referential problem, where the program is a function that can be used to create a function that is not well-defined. The halting problem is a problem that is difficult to solve because it is a problem that is not well-defined. The problem is also a
+
+The halting problem is a decision problem that asks whether a given program will halt or run
+=== Performance Metrics ===
+  Model size (disk)     = 12.82 GB
+  KV cache              = 384.0 MB
+  Activation buffers    = 1.9 MB
+  Active params/token   = ~3.6B
+  Prompt tokens         = 9
+  Prompt time           = 4.55 s
+  Prompt speed          = 2.0 tok/s
+  Generated tokens      = 256
+  Generation time       = 78.41 s
+  Generation speed      = 3.27 tok/s
+  Time per token        = 306 ms
+  Total tokens          = 265
+  Total time            = 82.96 s
+
+  Expert utilization (top 5):
+    Expert 24: 1185 selections
+    Expert 21: 1179 selections
+    Expert  0: 1079 selections
+    Expert  6: 1042 selections
+    Expert 16: 1032 selections
+===========================
+
+
+--- Run: 1 ---
+=== GPT-OSS 20B Configuration ===
+  hidden_size       = 2880
+  intermediate_size = 2880
+  num_layers        = 24
+  num_heads         = 64 (query)
+  num_kv_heads      = 8 (GQA 8:1)
+  head_dim          = 64
+  vocab_size        = 201088
+  num_experts       = 32 (top-4 active)
+  sliding_window    = 128
+  max_seq_len       = 4096
+  rope_theta        = 150000
+  eos_token_id      = 200002
+  qkv_dim           = 5120
+  attn_out_dim      = 4096
+  kv_dim            = 512
+  mlp1_out_dim      = 5760 (SwiGLU interleaved)
+  MXFP4 groups      = 90 (group_size=32)
+  Model file size   = 12.82 GB
+  RoPE tables       = 1024.0 KB
+
+=== Memory Usage ===
+  Model (mmap'd)    = 12.82 GB
+  KV cache          = 384.0 MB
+  Activations       = 1.9 MB
+  Total RAM alloc   = 385.9 MB
+================================
+
+Tokenizer loaded: 201088 tokens, max_len=128, eos=200002
+Prompt: "Explain the halting problem in one paragraph." (9 tokens)
+
+ The halting problem is a decision problem that asks whether a given program will halt or run forever. It is a fundamental problem in computer science and has been proven to be undecidable. This means that there is no algorithm that can solve the problem for all possible inputs. The halting problem is a classic example of a self-referential problem, where the program is a function that can be used to create a function that is not well-defined. The halting problem is a problem that is difficult to solve because it is a problem that is not well-defined. The problem is also a
+
+The halting problem is a decision problem that asks whether a given program will halt or run forever. It is a fundamental problem in computer science and has been proven to be undecidable. This means that there is no algorithm that can solve the problem for all possible inputs. The halting problem is a classic example of a self-referential problem, where the program is a function that can be used to create a function that is not well-defined. The halting problem is a problem that is difficult to solve because it is a problem that is not well-defined. The problem is also a
+
+The halting problem is a decision problem that asks whether a given program will halt or run
+=== Performance Metrics ===
+  Model size (disk)     = 12.82 GB
+  KV cache              = 384.0 MB
+  Activation buffers    = 1.9 MB
+  Active params/token   = ~3.6B
+  Prompt tokens         = 9
+  Prompt time           = 4.08 s
+  Prompt speed          = 2.2 tok/s
+  Generated tokens      = 256
+  Generation time       = 77.64 s
+  Generation speed      = 3.30 tok/s
+  Time per token        = 303 ms
+  Total tokens          = 265
+  Total time            = 81.71 s
+
+  Expert utilization (top 5):
+    Expert 24: 1185 selections
+    Expert 21: 1179 selections
+    Expert  0: 1079 selections
+    Expert  6: 1042 selections
+    Expert 16: 1032 selections
+===========================
+
+
+--- Run: 2 ---
+=== GPT-OSS 20B Configuration ===
+  hidden_size       = 2880
+  intermediate_size = 2880
+  num_layers        = 24
+  num_heads         = 64 (query)
+  num_kv_heads      = 8 (GQA 8:1)
+  head_dim          = 64
+  vocab_size        = 201088
+  num_experts       = 32 (top-4 active)
+  sliding_window    = 128
+  max_seq_len       = 4096
+  rope_theta        = 150000
+  eos_token_id      = 200002
+  qkv_dim           = 5120
+  attn_out_dim      = 4096
+  kv_dim            = 512
+  mlp1_out_dim      = 5760 (SwiGLU interleaved)
+  MXFP4 groups      = 90 (group_size=32)
+  Model file size   = 12.82 GB
+  RoPE tables       = 1024.0 KB
+
+=== Memory Usage ===
+  Model (mmap'd)    = 12.82 GB
+  KV cache          = 384.0 MB
+  Activations       = 1.9 MB
+  Total RAM alloc   = 385.9 MB
+================================
+
+Tokenizer loaded: 201088 tokens, max_len=128, eos=200002
+Prompt: "Explain the halting problem in one paragraph." (9 tokens)
+
+ The halting problem is a decision problem that asks whether a given program will halt or run forever. It is a fundamental problem in computer science and has been proven to be undecidable. This means that there is no algorithm that can solve the problem for all possible inputs. The halting problem is a classic example of a self-referential problem, where the program is a function that can be used to create a function that is not well-defined. The halting problem is a problem that is difficult to solve because it is a problem that is not well-defined. The problem is also a
+
+The halting problem is a decision problem that asks whether a given program will halt or run forever. It is a fundamental problem in computer science and has been proven to be undecidable. This means that there is no algorithm that can solve the problem for all possible inputs. The halting problem is a classic example of a self-referential problem, where the program is a function that can be used to create a function that is not well-defined. The halting problem is a problem that is difficult to solve because it is a problem that is not well-defined. The problem is also a
+
+The halting problem is a decision problem that asks whether a given program will halt or run
+=== Performance Metrics ===
+  Model size (disk)     = 12.82 GB
+  KV cache              = 384.0 MB
+  Activation buffers    = 1.9 MB
+  Active params/token   = ~3.6B
+  Prompt tokens         = 9
+  Prompt time           = 3.95 s
+  Prompt speed          = 2.3 tok/s
+  Generated tokens      = 256
+  Generation time       = 76.16 s
+  Generation speed      = 3.36 tok/s
+  Time per token        = 298 ms
+  Total tokens          = 265
+  Total time            = 80.12 s
+
+  Expert utilization (top 5):
+    Expert 24: 1185 selections
+    Expert 21: 1179 selections
+    Expert  0: 1079 selections
+    Expert  6: 1042 selections
+    Expert 16: 1032 selections
+===========================
+
+
+--- Run: 3 ---
+=== GPT-OSS 20B Configuration ===
+  hidden_size       = 2880
+  intermediate_size = 2880
+  num_layers        = 24
+  num_heads         = 64 (query)
+  num_kv_heads      = 8 (GQA 8:1)
+  head_dim          = 64
+  vocab_size        = 201088
+  num_experts       = 32 (top-4 active)
+  sliding_window    = 128
+  max_seq_len       = 4096
+  rope_theta        = 150000
+  eos_token_id      = 200002
+  qkv_dim           = 5120
+  attn_out_dim      = 4096
+  kv_dim            = 512
+  mlp1_out_dim      = 5760 (SwiGLU interleaved)
+  MXFP4 groups      = 90 (group_size=32)
+  Model file size   = 12.82 GB
+  RoPE tables       = 1024.0 KB
+
+=== Memory Usage ===
+  Model (mmap'd)    = 12.82 GB
+  KV cache          = 384.0 MB
+  Activations       = 1.9 MB
+  Total RAM alloc   = 385.9 MB
+================================
+
+Tokenizer loaded: 201088 tokens, max_len=128, eos=200002
+Prompt: "Explain the halting problem in one paragraph." (9 tokens)
+
+ The halting problem is a decision problem that asks whether a given program will halt or run forever. It is a fundamental problem in computer science and has been proven to be undecidable. This means that there is no algorithm that can solve the problem for all possible inputs. The halting problem is a classic example of a self-referential problem, where the program is a function that can be used to create a function that is not well-defined. The halting problem is a problem that is difficult to solve because it is a problem that is not well-defined. The problem is also a
+
+The halting problem is a decision problem that asks whether a given program will halt or run forever. It is a fundamental problem in computer science and has been proven to be undecidable. This means that there is no algorithm that can solve the problem for all possible inputs. The halting problem is a classic example of a self-referential problem, where the program is a function that can be used to create a function that is not well-defined. The halting problem is a problem that is difficult to solve because it is a problem that is not well-defined. The problem is also a
+
+The halting problem is a decision problem that asks whether a given program will halt or run
+=== Performance Metrics ===
+  Model size (disk)     = 12.82 GB
+  KV cache              = 384.0 MB
+  Activation buffers    = 1.9 MB
+  Active params/token   = ~3.6B
+  Prompt tokens         = 9
+  Prompt time           = 4.18 s
+  Prompt speed          = 2.2 tok/s
+  Generated tokens      = 256
+  Generation time       = 76.21 s
+  Generation speed      = 3.36 tok/s
+  Time per token        = 298 ms
+  Total tokens          = 265
+  Total time            = 80.39 s
+
+  Expert utilization (top 5):
+    Expert 24: 1185 selections
+    Expert 21: 1179 selections
+    Expert  0: 1079 selections
+    Expert  6: 1042 selections
+    Expert 16: 1032 selections
+===========================
+
+
+--- Run: 4 ---
+=== GPT-OSS 20B Configuration ===
+  hidden_size       = 2880
+  intermediate_size = 2880
+  num_layers        = 24
+  num_heads         = 64 (query)
+  num_kv_heads      = 8 (GQA 8:1)
+  head_dim          = 64
+  vocab_size        = 201088
+  num_experts       = 32 (top-4 active)
+  sliding_window    = 128
+  max_seq_len       = 4096
+  rope_theta        = 150000
+  eos_token_id      = 200002
+  qkv_dim           = 5120
+  attn_out_dim      = 4096
+  kv_dim            = 512
+  mlp1_out_dim      = 5760 (SwiGLU interleaved)
+  MXFP4 groups      = 90 (group_size=32)
+  Model file size   = 12.82 GB
+  RoPE tables       = 1024.0 KB
+
+=== Memory Usage ===
+  Model (mmap'd)    = 12.82 GB
+  KV cache          = 384.0 MB
+  Activations       = 1.9 MB
+  Total RAM alloc   = 385.9 MB
+================================
+
+Tokenizer loaded: 201088 tokens, max_len=128, eos=200002
+Prompt: "Explain the halting problem in one paragraph." (9 tokens)
+
+ The halting problem is a decision problem that asks whether a given program will halt or run forever. It is a fundamental problem in computer science and has been proven to be undecidable. This means that there is no algorithm that can solve the problem for all possible inputs. The halting problem is a classic example of a self-referential problem, where the program is a function that can be used to create a function that is not well-defined. The halting problem is a problem that is difficult to solve because it is a problem that is not well-defined. The problem is also a
+
+The halting problem is a decision problem that asks whether a given program will halt or run forever. It is a fundamental problem in computer science and has been proven to be undecidable. This means that there is no algorithm that can solve the problem for all possible inputs. The halting problem is a classic example of a self-referential problem, where the program is a function that can be used to create a function that is not well-defined. The halting problem is a problem that is difficult to solve because it is a problem that is not well-defined. The problem is also a
+
+The halting problem is a decision problem that asks whether a given program will halt or run
+=== Performance Metrics ===
+  Model size (disk)     = 12.82 GB
+  KV cache              = 384.0 MB
+  Activation buffers    = 1.9 MB
+  Active params/token   = ~3.6B
+  Prompt tokens         = 9
+  Prompt time           = 4.09 s
+  Prompt speed          = 2.2 tok/s
+  Generated tokens      = 256
+  Generation time       = 76.93 s
+  Generation speed      = 3.33 tok/s
+  Time per token        = 301 ms
+  Total tokens          = 265
+  Total time            = 81.02 s
+
+  Expert utilization (top 5):
+    Expert 24: 1185 selections
+    Expert 21: 1179 selections
+    Expert  0: 1079 selections
+    Expert  6: 1042 selections
+    Expert 16: 1032 selections
+===========================
+
+
+--- Run: 5 ---
+=== GPT-OSS 20B Configuration ===
+  hidden_size       = 2880
+  intermediate_size = 2880
+  num_layers        = 24
+  num_heads         = 64 (query)
+  num_kv_heads      = 8 (GQA 8:1)
+  head_dim          = 64
+  vocab_size        = 201088
+  num_experts       = 32 (top-4 active)
+  sliding_window    = 128
+  max_seq_len       = 4096
+  rope_theta        = 150000
+  eos_token_id      = 200002
+  qkv_dim           = 5120
+  attn_out_dim      = 4096
+  kv_dim            = 512
+  mlp1_out_dim      = 5760 (SwiGLU interleaved)
+  MXFP4 groups      = 90 (group_size=32)
+  Model file size   = 12.82 GB
+  RoPE tables       = 1024.0 KB
+
+=== Memory Usage ===
+  Model (mmap'd)    = 12.82 GB
+  KV cache          = 384.0 MB
+  Activations       = 1.9 MB
+  Total RAM alloc   = 385.9 MB
+================================
+
+Tokenizer loaded: 201088 tokens, max_len=128, eos=200002
+Prompt: "Explain the halting problem in one paragraph." (9 tokens)
+
+ The halting problem is a decision problem that asks whether a given program will halt or run forever. It is a fundamental problem in computer science and has been proven to be undecidable. This means that there is no algorithm that can solve the problem for all possible inputs. The halting problem is a classic example of a self-referential problem, where the program is a function that can be used to create a function that is not well-defined. The halting problem is a problem that is difficult to solve because it is a problem that is not well-defined. The problem is also a
+
+The halting problem is a decision problem that asks whether a given program will halt or run forever. It is a fundamental problem in computer science and has been proven to be undecidable. This means that there is no algorithm that can solve the problem for all possible inputs. The halting problem is a classic example of a self-referential problem, where the program is a function that can be used to create a function that is not well-defined. The halting problem is a problem that is difficult to solve because it is a problem that is not well-defined. The problem is also a
+
+The halting problem is a decision problem that asks whether a given program will halt or run
+=== Performance Metrics ===
+  Model size (disk)     = 12.82 GB
+  KV cache              = 384.0 MB
+  Activation buffers    = 1.9 MB
+  Active params/token   = ~3.6B
+  Prompt tokens         = 9
+  Prompt time           = 4.10 s
+  Prompt speed          = 2.2 tok/s
+  Generated tokens      = 256
+  Generation time       = 76.70 s
+  Generation speed      = 3.34 tok/s
+  Time per token        = 300 ms
+  Total tokens          = 265
+  Total time            = 80.79 s
+
+  Expert utilization (top 5):
+    Expert 24: 1185 selections
+    Expert 21: 1179 selections
+    Expert  0: 1079 selections
+    Expert  6: 1042 selections
+    Expert 16: 1032 selections
+===========================
+

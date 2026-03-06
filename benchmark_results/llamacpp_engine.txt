@@ -1,0 +1,978 @@
+=== llama.cpp Benchmark ===
+Date: Fri Mar  6 16:25:03 IST 2026
+
+--- Run: warmup (already done, model in cache) ---
+
+--- Run: 1 ---
+build: 1 (f6235a4) with GNU 15.2.0 for Windows AMD64
+main: llama backend init
+main: load the model and apply lora adapter, if any
+common_init_result: fitting params to device memory, for bugs during this step try to reproduce them with -fit off, or provide --verbose logs if the bug only occurs with -fit on
+llama_params_fit_impl: no devices with dedicated memory found
+llama_params_fit: successfully fit params to free device memory
+llama_params_fit: fitting params to free memory took 0.45 seconds
+llama_model_loader: loaded meta data with 35 key-value pairs and 459 tensors from gpt-oss-20b-gguf/gpt-oss-20b-mxfp4.gguf (version GGUF V3 (latest))
+llama_model_loader: Dumping metadata keys/values. Note: KV overrides do not apply in this output.
+llama_model_loader: - kv   0:                       general.architecture str              = gpt-oss
+llama_model_loader: - kv   1:                               general.type str              = model
+llama_model_loader: - kv   2:                               general.name str              = Gpt Oss 20b
+llama_model_loader: - kv   3:                           general.basename str              = gpt-oss
+llama_model_loader: - kv   4:                         general.size_label str              = 20B
+llama_model_loader: - kv   5:                            general.license str              = apache-2.0
+llama_model_loader: - kv   6:                               general.tags arr[str,2]       = ["vllm", "text-generation"]
+llama_model_loader: - kv   7:                        gpt-oss.block_count u32              = 24
+llama_model_loader: - kv   8:                     gpt-oss.context_length u32              = 131072
+llama_model_loader: - kv   9:                   gpt-oss.embedding_length u32              = 2880
+llama_model_loader: - kv  10:                gpt-oss.feed_forward_length u32              = 2880
+llama_model_loader: - kv  11:               gpt-oss.attention.head_count u32              = 64
+llama_model_loader: - kv  12:            gpt-oss.attention.head_count_kv u32              = 8
+llama_model_loader: - kv  13:                     gpt-oss.rope.freq_base f32              = 150000.000000
+llama_model_loader: - kv  14:   gpt-oss.attention.layer_norm_rms_epsilon f32              = 0.000010
+llama_model_loader: - kv  15:                       gpt-oss.expert_count u32              = 32
+llama_model_loader: - kv  16:                  gpt-oss.expert_used_count u32              = 4
+llama_model_loader: - kv  17:               gpt-oss.attention.key_length u32              = 64
+llama_model_loader: - kv  18:             gpt-oss.attention.value_length u32              = 64
+llama_model_loader: - kv  19:           gpt-oss.attention.sliding_window u32              = 128
+llama_model_loader: - kv  20:         gpt-oss.expert_feed_forward_length u32              = 2880
+llama_model_loader: - kv  21:                  gpt-oss.rope.scaling.type str              = yarn
+llama_model_loader: - kv  22:                gpt-oss.rope.scaling.factor f32              = 32.000000
+llama_model_loader: - kv  23: gpt-oss.rope.scaling.original_context_length u32              = 4096
+llama_model_loader: - kv  24:                       tokenizer.ggml.model str              = gpt2
+llama_model_loader: - kv  25:                         tokenizer.ggml.pre str              = gpt-4o
+llama_model_loader: - kv  26:                      tokenizer.ggml.tokens arr[str,201088]  = ["!", "\"", "#", "$", "%", "&", "'", ...
+llama_model_loader: - kv  27:                  tokenizer.ggml.token_type arr[i32,201088]  = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...
+llama_model_loader: - kv  28:                      tokenizer.ggml.merges arr[str,446189]  = ["Ġ Ġ", "Ġ ĠĠĠ", "ĠĠ ĠĠ", "...
+llama_model_loader: - kv  29:                tokenizer.ggml.bos_token_id u32              = 199998
+llama_model_loader: - kv  30:                tokenizer.ggml.eos_token_id u32              = 200002
+llama_model_loader: - kv  31:            tokenizer.ggml.padding_token_id u32              = 199999
+llama_model_loader: - kv  32:                    tokenizer.chat_template str              = {#-\n  In addition to the normal input...
+llama_model_loader: - kv  33:               general.quantization_version u32              = 2
+llama_model_loader: - kv  34:                          general.file_type u32              = 38
+llama_model_loader: - type  f32:  289 tensors
+llama_model_loader: - type q8_0:   98 tensors
+llama_model_loader: - type mxfp4:   72 tensors
+print_info: file format = GGUF V3 (latest)
+print_info: file type   = MXFP4 MoE
+print_info: file size   = 11.27 GiB (4.63 BPW) 
+load: 0 unused tokens
+load: setting token '<|message|>' (200008) attribute to USER_DEFINED (16), old attributes: 8
+load: setting token '<|start|>' (200006) attribute to USER_DEFINED (16), old attributes: 8
+load: setting token '<|constrain|>' (200003) attribute to USER_DEFINED (16), old attributes: 8
+load: setting token '<|channel|>' (200005) attribute to USER_DEFINED (16), old attributes: 8
+load: printing all EOG tokens:
+load:   - 199999 ('<|endoftext|>')
+load:   - 200002 ('<|return|>')
+load:   - 200007 ('<|end|>')
+load:   - 200012 ('<|call|>')
+load: special_eog_ids contains both '<|return|>' and '<|call|>', or '<|calls|>' and '<|flush|>' tokens, removing '<|end|>' token from EOG list
+load: special tokens cache size = 21
+load: token to piece cache size = 1.3332 MB
+print_info: arch                  = gpt-oss
+print_info: vocab_only            = 0
+print_info: no_alloc              = 0
+print_info: n_ctx_train           = 131072
+print_info: n_embd                = 2880
+print_info: n_embd_inp            = 2880
+print_info: n_layer               = 24
+print_info: n_head                = 64
+print_info: n_head_kv             = 8
+print_info: n_rot                 = 64
+print_info: n_swa                 = 128
+print_info: is_swa_any            = 1
+print_info: n_embd_head_k         = 64
+print_info: n_embd_head_v         = 64
+print_info: n_gqa                 = 8
+print_info: n_embd_k_gqa          = 512
+print_info: n_embd_v_gqa          = 512
+print_info: f_norm_eps            = 0.0e+00
+print_info: f_norm_rms_eps        = 1.0e-05
+print_info: f_clamp_kqv           = 0.0e+00
+print_info: f_max_alibi_bias      = 0.0e+00
+print_info: f_logit_scale         = 0.0e+00
+print_info: f_attn_scale          = 0.0e+00
+print_info: n_ff                  = 2880
+print_info: n_expert              = 32
+print_info: n_expert_used         = 4
+print_info: n_expert_groups       = 0
+print_info: n_group_used          = 0
+print_info: causal attn           = 1
+print_info: pooling type          = 0
+print_info: rope type             = 2
+print_info: rope scaling          = yarn
+print_info: freq_base_train       = 150000.0
+print_info: freq_scale_train      = 0.03125
+print_info: freq_base_swa         = 150000.0
+print_info: freq_scale_swa        = 0.03125
+print_info: n_ctx_orig_yarn       = 4096
+print_info: rope_yarn_log_mul     = 0.0000
+print_info: rope_finetuned        = unknown
+print_info: model type            = 20B
+print_info: model params          = 20.91 B
+print_info: general.name          = Gpt Oss 20b
+print_info: n_ff_exp              = 2880
+print_info: vocab type            = BPE
+print_info: n_vocab               = 201088
+print_info: n_merges              = 446189
+print_info: BOS token             = 199998 '<|startoftext|>'
+print_info: EOS token             = 200002 '<|return|>'
+print_info: EOT token             = 199999 '<|endoftext|>'
+print_info: PAD token             = 199999 '<|endoftext|>'
+print_info: LF token              = 198 'Ċ'
+print_info: EOG token             = 199999 '<|endoftext|>'
+print_info: EOG token             = 200002 '<|return|>'
+print_info: EOG token             = 200012 '<|call|>'
+print_info: max token length      = 256
+load_tensors: loading model tensors, this can take a while... (mmap = true, direct_io = false)
+load_tensors:   CPU_Mapped model buffer size = 11536.18 MiB
+load_tensors:   CPU_REPACK model buffer size =  9682.03 MiB
+................................................................................
+common_init_result: added <|endoftext|> logit bias = -inf
+common_init_result: added <|return|> logit bias = -inf
+common_init_result: added <|call|> logit bias = -inf
+llama_context: constructing llama_context
+llama_context: n_seq_max     = 1
+llama_context: n_ctx         = 131072
+llama_context: n_ctx_seq     = 131072
+llama_context: n_batch       = 2048
+llama_context: n_ubatch      = 512
+llama_context: causal_attn   = 1
+llama_context: flash_attn    = auto
+llama_context: kv_unified    = false
+llama_context: freq_base     = 150000.0
+llama_context: freq_scale    = 0.03125
+llama_context:        CPU  output buffer size =     0.77 MiB
+llama_kv_cache_iswa: creating non-SWA KV cache, size = 131072 cells
+llama_kv_cache:        CPU KV buffer size =  3072.00 MiB
+llama_kv_cache: size = 3072.00 MiB (131072 cells,  12 layers,  1/1 seqs), K (f16): 1536.00 MiB, V (f16): 1536.00 MiB
+llama_kv_cache_iswa: creating     SWA KV cache, size = 768 cells
+llama_kv_cache:        CPU KV buffer size =    18.00 MiB
+llama_kv_cache: size =   18.00 MiB (   768 cells,  12 layers,  1/1 seqs), K (f16):    9.00 MiB, V (f16):    9.00 MiB
+sched_reserve: reserving ...
+sched_reserve: Flash Attention was auto, set to enabled
+sched_reserve:        CPU compute buffer size =   419.15 MiB
+sched_reserve: graph nodes  = 1352
+sched_reserve: graph splits = 1
+sched_reserve: reserve took 18.80 ms, sched copies = 1
+common_init_from_params: warming up the model with an empty run - please wait ... (--no-warmup to disable)
+main: llama threadpool init, n_threads = 14
+main: chat template is available, enabling conversation mode (disable it with -no-cnv)
+*** User-specified prompt will pre-start conversation, did you mean to set --system-prompt (-sys) instead?
+main: chat template example:
+<|start|>system<|message|>You are a helpful assistant<|end|><|start|>user<|message|>Hello<|end|><|start|>assistant<|message|>Hi there<|return|><|start|>user<|message|>How are you?<|end|><|start|>assistant
+
+system_info: n_threads = 14 (n_threads_batch = 14) / 28 | CPU : SSE3 = 1 | SSSE3 = 1 | AVX = 1 | AVX_VNNI = 1 | AVX2 = 1 | F16C = 1 | FMA = 1 | BMI2 = 1 | LLAMAFILE = 1 | OPENMP = 1 | REPACK = 1 | 
+
+main: interactive mode on.
+sampler seed: 42
+sampler params: 
+	repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
+	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = -1
+	top_k = 40, top_p = 0.950, min_p = 0.050, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.000
+	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+sampler chain: logits -> ?penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> min-p -> ?xtc -> temp-ext -> dist 
+generate: n_ctx = 131072, n_batch = 2048, n_predict = 256, n_keep = 0
+
+== Running in interactive mode. ==
+ - Press Ctrl+C to interject at any time.
+ - Press Return to return control to the AI.
+ - To return control without starting a new line, end your input with '/'.
+ - If you want to submit another line, end your input with '\'.
+ - Not using system message. To change it, set a different value via -sys PROMPT
+
+<|channel|>analysis<|message|>We need to explain the halting problem in one paragraph. The halting problem: given a description of a program and its input, determine whether the program will eventually halt or run forever. It's undecidable: no algorithm can solve it for all programs. We can mention Turing's proof, reduction to contradiction, diagonalization, etc. Provide a concise explanation.<|end|><|start|>assistant<|channel|>final<|message|>The halting problem asks whether there exists a single algorithm that, given any computer program and its input, can always decide in finite time whether that program will eventually stop running (halt) or continue forever. In 1936, Alan Turing proved that no such universal algorithm can exist: by constructing a self‑referential “diagonal” program that behaves opposite to what the hypothetical halting‑detector predicts, he showed that assuming a halting‑detector leads to a logical contradiction. Thus, the halting problem is undecidable—there is no general procedure that can correctly determine for every program whether it will halt.
+
+> EOF by user
+
+
+common_perf_print:    sampling time =      72.70 ms
+common_perf_print:    samplers time =      23.61 ms /   225 tokens
+common_perf_print:        load time =   46657.14 ms
+common_perf_print: prompt eval time =    5074.89 ms /    15 tokens (  338.33 ms per token,     2.96 tokens per second)
+common_perf_print:        eval time =   49156.43 ms /   209 runs   (  235.20 ms per token,     4.25 tokens per second)
+common_perf_print:       total time =   54496.33 ms /   224 tokens
+common_perf_print: unaccounted time =     192.31 ms /   0.4 %      (total - sampling - prompt eval - eval) / (total)
+common_perf_print:    graphs reused =        208
+llama_memory_breakdown_print: | memory breakdown [MiB] | total   free     self   model   context   compute    unaccounted |
+llama_memory_breakdown_print: |   - Host               |                 15045 = 11536 +    3090 +     419                |
+llama_memory_breakdown_print: |   - CPU_REPACK         |                  9682 =  9682 +       0 +       0                |
+
+--- Run: 2 ---
+build: 1 (f6235a4) with GNU 15.2.0 for Windows AMD64
+main: llama backend init
+main: load the model and apply lora adapter, if any
+common_init_result: fitting params to device memory, for bugs during this step try to reproduce them with -fit off, or provide --verbose logs if the bug only occurs with -fit on
+llama_params_fit_impl: no devices with dedicated memory found
+llama_params_fit: successfully fit params to free device memory
+llama_params_fit: fitting params to free memory took 0.55 seconds
+llama_model_loader: loaded meta data with 35 key-value pairs and 459 tensors from gpt-oss-20b-gguf/gpt-oss-20b-mxfp4.gguf (version GGUF V3 (latest))
+llama_model_loader: Dumping metadata keys/values. Note: KV overrides do not apply in this output.
+llama_model_loader: - kv   0:                       general.architecture str              = gpt-oss
+llama_model_loader: - kv   1:                               general.type str              = model
+llama_model_loader: - kv   2:                               general.name str              = Gpt Oss 20b
+llama_model_loader: - kv   3:                           general.basename str              = gpt-oss
+llama_model_loader: - kv   4:                         general.size_label str              = 20B
+llama_model_loader: - kv   5:                            general.license str              = apache-2.0
+llama_model_loader: - kv   6:                               general.tags arr[str,2]       = ["vllm", "text-generation"]
+llama_model_loader: - kv   7:                        gpt-oss.block_count u32              = 24
+llama_model_loader: - kv   8:                     gpt-oss.context_length u32              = 131072
+llama_model_loader: - kv   9:                   gpt-oss.embedding_length u32              = 2880
+llama_model_loader: - kv  10:                gpt-oss.feed_forward_length u32              = 2880
+llama_model_loader: - kv  11:               gpt-oss.attention.head_count u32              = 64
+llama_model_loader: - kv  12:            gpt-oss.attention.head_count_kv u32              = 8
+llama_model_loader: - kv  13:                     gpt-oss.rope.freq_base f32              = 150000.000000
+llama_model_loader: - kv  14:   gpt-oss.attention.layer_norm_rms_epsilon f32              = 0.000010
+llama_model_loader: - kv  15:                       gpt-oss.expert_count u32              = 32
+llama_model_loader: - kv  16:                  gpt-oss.expert_used_count u32              = 4
+llama_model_loader: - kv  17:               gpt-oss.attention.key_length u32              = 64
+llama_model_loader: - kv  18:             gpt-oss.attention.value_length u32              = 64
+llama_model_loader: - kv  19:           gpt-oss.attention.sliding_window u32              = 128
+llama_model_loader: - kv  20:         gpt-oss.expert_feed_forward_length u32              = 2880
+llama_model_loader: - kv  21:                  gpt-oss.rope.scaling.type str              = yarn
+llama_model_loader: - kv  22:                gpt-oss.rope.scaling.factor f32              = 32.000000
+llama_model_loader: - kv  23: gpt-oss.rope.scaling.original_context_length u32              = 4096
+llama_model_loader: - kv  24:                       tokenizer.ggml.model str              = gpt2
+llama_model_loader: - kv  25:                         tokenizer.ggml.pre str              = gpt-4o
+llama_model_loader: - kv  26:                      tokenizer.ggml.tokens arr[str,201088]  = ["!", "\"", "#", "$", "%", "&", "'", ...
+llama_model_loader: - kv  27:                  tokenizer.ggml.token_type arr[i32,201088]  = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...
+llama_model_loader: - kv  28:                      tokenizer.ggml.merges arr[str,446189]  = ["Ġ Ġ", "Ġ ĠĠĠ", "ĠĠ ĠĠ", "...
+llama_model_loader: - kv  29:                tokenizer.ggml.bos_token_id u32              = 199998
+llama_model_loader: - kv  30:                tokenizer.ggml.eos_token_id u32              = 200002
+llama_model_loader: - kv  31:            tokenizer.ggml.padding_token_id u32              = 199999
+llama_model_loader: - kv  32:                    tokenizer.chat_template str              = {#-\n  In addition to the normal input...
+llama_model_loader: - kv  33:               general.quantization_version u32              = 2
+llama_model_loader: - kv  34:                          general.file_type u32              = 38
+llama_model_loader: - type  f32:  289 tensors
+llama_model_loader: - type q8_0:   98 tensors
+llama_model_loader: - type mxfp4:   72 tensors
+print_info: file format = GGUF V3 (latest)
+print_info: file type   = MXFP4 MoE
+print_info: file size   = 11.27 GiB (4.63 BPW) 
+load: 0 unused tokens
+load: setting token '<|message|>' (200008) attribute to USER_DEFINED (16), old attributes: 8
+load: setting token '<|start|>' (200006) attribute to USER_DEFINED (16), old attributes: 8
+load: setting token '<|constrain|>' (200003) attribute to USER_DEFINED (16), old attributes: 8
+load: setting token '<|channel|>' (200005) attribute to USER_DEFINED (16), old attributes: 8
+load: printing all EOG tokens:
+load:   - 199999 ('<|endoftext|>')
+load:   - 200002 ('<|return|>')
+load:   - 200007 ('<|end|>')
+load:   - 200012 ('<|call|>')
+load: special_eog_ids contains both '<|return|>' and '<|call|>', or '<|calls|>' and '<|flush|>' tokens, removing '<|end|>' token from EOG list
+load: special tokens cache size = 21
+load: token to piece cache size = 1.3332 MB
+print_info: arch                  = gpt-oss
+print_info: vocab_only            = 0
+print_info: no_alloc              = 0
+print_info: n_ctx_train           = 131072
+print_info: n_embd                = 2880
+print_info: n_embd_inp            = 2880
+print_info: n_layer               = 24
+print_info: n_head                = 64
+print_info: n_head_kv             = 8
+print_info: n_rot                 = 64
+print_info: n_swa                 = 128
+print_info: is_swa_any            = 1
+print_info: n_embd_head_k         = 64
+print_info: n_embd_head_v         = 64
+print_info: n_gqa                 = 8
+print_info: n_embd_k_gqa          = 512
+print_info: n_embd_v_gqa          = 512
+print_info: f_norm_eps            = 0.0e+00
+print_info: f_norm_rms_eps        = 1.0e-05
+print_info: f_clamp_kqv           = 0.0e+00
+print_info: f_max_alibi_bias      = 0.0e+00
+print_info: f_logit_scale         = 0.0e+00
+print_info: f_attn_scale          = 0.0e+00
+print_info: n_ff                  = 2880
+print_info: n_expert              = 32
+print_info: n_expert_used         = 4
+print_info: n_expert_groups       = 0
+print_info: n_group_used          = 0
+print_info: causal attn           = 1
+print_info: pooling type          = 0
+print_info: rope type             = 2
+print_info: rope scaling          = yarn
+print_info: freq_base_train       = 150000.0
+print_info: freq_scale_train      = 0.03125
+print_info: freq_base_swa         = 150000.0
+print_info: freq_scale_swa        = 0.03125
+print_info: n_ctx_orig_yarn       = 4096
+print_info: rope_yarn_log_mul     = 0.0000
+print_info: rope_finetuned        = unknown
+print_info: model type            = 20B
+print_info: model params          = 20.91 B
+print_info: general.name          = Gpt Oss 20b
+print_info: n_ff_exp              = 2880
+print_info: vocab type            = BPE
+print_info: n_vocab               = 201088
+print_info: n_merges              = 446189
+print_info: BOS token             = 199998 '<|startoftext|>'
+print_info: EOS token             = 200002 '<|return|>'
+print_info: EOT token             = 199999 '<|endoftext|>'
+print_info: PAD token             = 199999 '<|endoftext|>'
+print_info: LF token              = 198 'Ċ'
+print_info: EOG token             = 199999 '<|endoftext|>'
+print_info: EOG token             = 200002 '<|return|>'
+print_info: EOG token             = 200012 '<|call|>'
+print_info: max token length      = 256
+load_tensors: loading model tensors, this can take a while... (mmap = true, direct_io = false)
+load_tensors:   CPU_Mapped model buffer size = 11536.18 MiB
+load_tensors:   CPU_REPACK model buffer size =  9682.03 MiB
+................................................................................
+common_init_result: added <|endoftext|> logit bias = -inf
+common_init_result: added <|return|> logit bias = -inf
+common_init_result: added <|call|> logit bias = -inf
+llama_context: constructing llama_context
+llama_context: n_seq_max     = 1
+llama_context: n_ctx         = 131072
+llama_context: n_ctx_seq     = 131072
+llama_context: n_batch       = 2048
+llama_context: n_ubatch      = 512
+llama_context: causal_attn   = 1
+llama_context: flash_attn    = auto
+llama_context: kv_unified    = false
+llama_context: freq_base     = 150000.0
+llama_context: freq_scale    = 0.03125
+llama_context:        CPU  output buffer size =     0.77 MiB
+llama_kv_cache_iswa: creating non-SWA KV cache, size = 131072 cells
+llama_kv_cache:        CPU KV buffer size =  3072.00 MiB
+llama_kv_cache: size = 3072.00 MiB (131072 cells,  12 layers,  1/1 seqs), K (f16): 1536.00 MiB, V (f16): 1536.00 MiB
+llama_kv_cache_iswa: creating     SWA KV cache, size = 768 cells
+llama_kv_cache:        CPU KV buffer size =    18.00 MiB
+llama_kv_cache: size =   18.00 MiB (   768 cells,  12 layers,  1/1 seqs), K (f16):    9.00 MiB, V (f16):    9.00 MiB
+sched_reserve: reserving ...
+sched_reserve: Flash Attention was auto, set to enabled
+sched_reserve:        CPU compute buffer size =   419.15 MiB
+sched_reserve: graph nodes  = 1352
+sched_reserve: graph splits = 1
+sched_reserve: reserve took 11.61 ms, sched copies = 1
+common_init_from_params: warming up the model with an empty run - please wait ... (--no-warmup to disable)
+main: llama threadpool init, n_threads = 14
+main: chat template is available, enabling conversation mode (disable it with -no-cnv)
+*** User-specified prompt will pre-start conversation, did you mean to set --system-prompt (-sys) instead?
+main: chat template example:
+<|start|>system<|message|>You are a helpful assistant<|end|><|start|>user<|message|>Hello<|end|><|start|>assistant<|message|>Hi there<|return|><|start|>user<|message|>How are you?<|end|><|start|>assistant
+
+system_info: n_threads = 14 (n_threads_batch = 14) / 28 | CPU : SSE3 = 1 | SSSE3 = 1 | AVX = 1 | AVX_VNNI = 1 | AVX2 = 1 | F16C = 1 | FMA = 1 | BMI2 = 1 | LLAMAFILE = 1 | OPENMP = 1 | REPACK = 1 | 
+
+main: interactive mode on.
+sampler seed: 42
+sampler params: 
+	repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
+	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = -1
+	top_k = 40, top_p = 0.950, min_p = 0.050, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.000
+	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+sampler chain: logits -> ?penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> min-p -> ?xtc -> temp-ext -> dist 
+generate: n_ctx = 131072, n_batch = 2048, n_predict = 256, n_keep = 0
+
+== Running in interactive mode. ==
+ - Press Ctrl+C to interject at any time.
+ - Press Return to return control to the AI.
+ - To return control without starting a new line, end your input with '/'.
+ - If you want to submit another line, end your input with '\'.
+ - Not using system message. To change it, set a different value via -sys PROMPT
+
+<|channel|>analysis<|message|>We need to explain the halting problem in one paragraph. The halting problem: given a description of a program and its input, determine whether the program will eventually halt or run forever. It's undecidable: no algorithm can solve it for all programs. We can mention Turing's proof, reduction to contradiction, diagonalization, etc. Provide a concise explanation.<|end|><|start|>assistant<|channel|>final<|message|>The halting problem asks whether there exists a single algorithm that, given any computer program and its input, can always decide in finite time whether that program will eventually stop running (halt) or continue forever. In 1936, Alan Turing proved that no such universal algorithm can exist: by constructing a self‑referential “diagonal” program that behaves opposite to what the hypothetical halting‑detector predicts, he showed that assuming a halting‑detector leads to a logical contradiction. Thus, the halting problem is undecidable—there is no general procedure that can correctly determine for every program whether it will halt.
+
+> EOF by user
+
+
+common_perf_print:    sampling time =      71.28 ms
+common_perf_print:    samplers time =      23.84 ms /   225 tokens
+common_perf_print:        load time =   48530.96 ms
+common_perf_print: prompt eval time =    4127.37 ms /    15 tokens (  275.16 ms per token,     3.63 tokens per second)
+common_perf_print:        eval time =   47961.68 ms /   209 runs   (  229.48 ms per token,     4.36 tokens per second)
+common_perf_print:       total time =   52399.36 ms /   224 tokens
+common_perf_print: unaccounted time =     239.03 ms /   0.5 %      (total - sampling - prompt eval - eval) / (total)
+common_perf_print:    graphs reused =        208
+llama_memory_breakdown_print: | memory breakdown [MiB] | total   free     self   model   context   compute    unaccounted |
+llama_memory_breakdown_print: |   - Host               |                 15045 = 11536 +    3090 +     419                |
+llama_memory_breakdown_print: |   - CPU_REPACK         |                  9682 =  9682 +       0 +       0                |
+
+--- Run: 3 ---
+build: 1 (f6235a4) with GNU 15.2.0 for Windows AMD64
+main: llama backend init
+main: load the model and apply lora adapter, if any
+common_init_result: fitting params to device memory, for bugs during this step try to reproduce them with -fit off, or provide --verbose logs if the bug only occurs with -fit on
+llama_params_fit_impl: no devices with dedicated memory found
+llama_params_fit: successfully fit params to free device memory
+llama_params_fit: fitting params to free memory took 0.47 seconds
+llama_model_loader: loaded meta data with 35 key-value pairs and 459 tensors from gpt-oss-20b-gguf/gpt-oss-20b-mxfp4.gguf (version GGUF V3 (latest))
+llama_model_loader: Dumping metadata keys/values. Note: KV overrides do not apply in this output.
+llama_model_loader: - kv   0:                       general.architecture str              = gpt-oss
+llama_model_loader: - kv   1:                               general.type str              = model
+llama_model_loader: - kv   2:                               general.name str              = Gpt Oss 20b
+llama_model_loader: - kv   3:                           general.basename str              = gpt-oss
+llama_model_loader: - kv   4:                         general.size_label str              = 20B
+llama_model_loader: - kv   5:                            general.license str              = apache-2.0
+llama_model_loader: - kv   6:                               general.tags arr[str,2]       = ["vllm", "text-generation"]
+llama_model_loader: - kv   7:                        gpt-oss.block_count u32              = 24
+llama_model_loader: - kv   8:                     gpt-oss.context_length u32              = 131072
+llama_model_loader: - kv   9:                   gpt-oss.embedding_length u32              = 2880
+llama_model_loader: - kv  10:                gpt-oss.feed_forward_length u32              = 2880
+llama_model_loader: - kv  11:               gpt-oss.attention.head_count u32              = 64
+llama_model_loader: - kv  12:            gpt-oss.attention.head_count_kv u32              = 8
+llama_model_loader: - kv  13:                     gpt-oss.rope.freq_base f32              = 150000.000000
+llama_model_loader: - kv  14:   gpt-oss.attention.layer_norm_rms_epsilon f32              = 0.000010
+llama_model_loader: - kv  15:                       gpt-oss.expert_count u32              = 32
+llama_model_loader: - kv  16:                  gpt-oss.expert_used_count u32              = 4
+llama_model_loader: - kv  17:               gpt-oss.attention.key_length u32              = 64
+llama_model_loader: - kv  18:             gpt-oss.attention.value_length u32              = 64
+llama_model_loader: - kv  19:           gpt-oss.attention.sliding_window u32              = 128
+llama_model_loader: - kv  20:         gpt-oss.expert_feed_forward_length u32              = 2880
+llama_model_loader: - kv  21:                  gpt-oss.rope.scaling.type str              = yarn
+llama_model_loader: - kv  22:                gpt-oss.rope.scaling.factor f32              = 32.000000
+llama_model_loader: - kv  23: gpt-oss.rope.scaling.original_context_length u32              = 4096
+llama_model_loader: - kv  24:                       tokenizer.ggml.model str              = gpt2
+llama_model_loader: - kv  25:                         tokenizer.ggml.pre str              = gpt-4o
+llama_model_loader: - kv  26:                      tokenizer.ggml.tokens arr[str,201088]  = ["!", "\"", "#", "$", "%", "&", "'", ...
+llama_model_loader: - kv  27:                  tokenizer.ggml.token_type arr[i32,201088]  = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...
+llama_model_loader: - kv  28:                      tokenizer.ggml.merges arr[str,446189]  = ["Ġ Ġ", "Ġ ĠĠĠ", "ĠĠ ĠĠ", "...
+llama_model_loader: - kv  29:                tokenizer.ggml.bos_token_id u32              = 199998
+llama_model_loader: - kv  30:                tokenizer.ggml.eos_token_id u32              = 200002
+llama_model_loader: - kv  31:            tokenizer.ggml.padding_token_id u32              = 199999
+llama_model_loader: - kv  32:                    tokenizer.chat_template str              = {#-\n  In addition to the normal input...
+llama_model_loader: - kv  33:               general.quantization_version u32              = 2
+llama_model_loader: - kv  34:                          general.file_type u32              = 38
+llama_model_loader: - type  f32:  289 tensors
+llama_model_loader: - type q8_0:   98 tensors
+llama_model_loader: - type mxfp4:   72 tensors
+print_info: file format = GGUF V3 (latest)
+print_info: file type   = MXFP4 MoE
+print_info: file size   = 11.27 GiB (4.63 BPW) 
+load: 0 unused tokens
+load: setting token '<|message|>' (200008) attribute to USER_DEFINED (16), old attributes: 8
+load: setting token '<|start|>' (200006) attribute to USER_DEFINED (16), old attributes: 8
+load: setting token '<|constrain|>' (200003) attribute to USER_DEFINED (16), old attributes: 8
+load: setting token '<|channel|>' (200005) attribute to USER_DEFINED (16), old attributes: 8
+load: printing all EOG tokens:
+load:   - 199999 ('<|endoftext|>')
+load:   - 200002 ('<|return|>')
+load:   - 200007 ('<|end|>')
+load:   - 200012 ('<|call|>')
+load: special_eog_ids contains both '<|return|>' and '<|call|>', or '<|calls|>' and '<|flush|>' tokens, removing '<|end|>' token from EOG list
+load: special tokens cache size = 21
+load: token to piece cache size = 1.3332 MB
+print_info: arch                  = gpt-oss
+print_info: vocab_only            = 0
+print_info: no_alloc              = 0
+print_info: n_ctx_train           = 131072
+print_info: n_embd                = 2880
+print_info: n_embd_inp            = 2880
+print_info: n_layer               = 24
+print_info: n_head                = 64
+print_info: n_head_kv             = 8
+print_info: n_rot                 = 64
+print_info: n_swa                 = 128
+print_info: is_swa_any            = 1
+print_info: n_embd_head_k         = 64
+print_info: n_embd_head_v         = 64
+print_info: n_gqa                 = 8
+print_info: n_embd_k_gqa          = 512
+print_info: n_embd_v_gqa          = 512
+print_info: f_norm_eps            = 0.0e+00
+print_info: f_norm_rms_eps        = 1.0e-05
+print_info: f_clamp_kqv           = 0.0e+00
+print_info: f_max_alibi_bias      = 0.0e+00
+print_info: f_logit_scale         = 0.0e+00
+print_info: f_attn_scale          = 0.0e+00
+print_info: n_ff                  = 2880
+print_info: n_expert              = 32
+print_info: n_expert_used         = 4
+print_info: n_expert_groups       = 0
+print_info: n_group_used          = 0
+print_info: causal attn           = 1
+print_info: pooling type          = 0
+print_info: rope type             = 2
+print_info: rope scaling          = yarn
+print_info: freq_base_train       = 150000.0
+print_info: freq_scale_train      = 0.03125
+print_info: freq_base_swa         = 150000.0
+print_info: freq_scale_swa        = 0.03125
+print_info: n_ctx_orig_yarn       = 4096
+print_info: rope_yarn_log_mul     = 0.0000
+print_info: rope_finetuned        = unknown
+print_info: model type            = 20B
+print_info: model params          = 20.91 B
+print_info: general.name          = Gpt Oss 20b
+print_info: n_ff_exp              = 2880
+print_info: vocab type            = BPE
+print_info: n_vocab               = 201088
+print_info: n_merges              = 446189
+print_info: BOS token             = 199998 '<|startoftext|>'
+print_info: EOS token             = 200002 '<|return|>'
+print_info: EOT token             = 199999 '<|endoftext|>'
+print_info: PAD token             = 199999 '<|endoftext|>'
+print_info: LF token              = 198 'Ċ'
+print_info: EOG token             = 199999 '<|endoftext|>'
+print_info: EOG token             = 200002 '<|return|>'
+print_info: EOG token             = 200012 '<|call|>'
+print_info: max token length      = 256
+load_tensors: loading model tensors, this can take a while... (mmap = true, direct_io = false)
+load_tensors:   CPU_Mapped model buffer size = 11536.18 MiB
+load_tensors:   CPU_REPACK model buffer size =  9682.03 MiB
+................................................................................
+common_init_result: added <|endoftext|> logit bias = -inf
+common_init_result: added <|return|> logit bias = -inf
+common_init_result: added <|call|> logit bias = -inf
+llama_context: constructing llama_context
+llama_context: n_seq_max     = 1
+llama_context: n_ctx         = 131072
+llama_context: n_ctx_seq     = 131072
+llama_context: n_batch       = 2048
+llama_context: n_ubatch      = 512
+llama_context: causal_attn   = 1
+llama_context: flash_attn    = auto
+llama_context: kv_unified    = false
+llama_context: freq_base     = 150000.0
+llama_context: freq_scale    = 0.03125
+llama_context:        CPU  output buffer size =     0.77 MiB
+llama_kv_cache_iswa: creating non-SWA KV cache, size = 131072 cells
+llama_kv_cache:        CPU KV buffer size =  3072.00 MiB
+llama_kv_cache: size = 3072.00 MiB (131072 cells,  12 layers,  1/1 seqs), K (f16): 1536.00 MiB, V (f16): 1536.00 MiB
+llama_kv_cache_iswa: creating     SWA KV cache, size = 768 cells
+llama_kv_cache:        CPU KV buffer size =    18.00 MiB
+llama_kv_cache: size =   18.00 MiB (   768 cells,  12 layers,  1/1 seqs), K (f16):    9.00 MiB, V (f16):    9.00 MiB
+sched_reserve: reserving ...
+sched_reserve: Flash Attention was auto, set to enabled
+sched_reserve:        CPU compute buffer size =   419.15 MiB
+sched_reserve: graph nodes  = 1352
+sched_reserve: graph splits = 1
+sched_reserve: reserve took 8.67 ms, sched copies = 1
+common_init_from_params: warming up the model with an empty run - please wait ... (--no-warmup to disable)
+main: llama threadpool init, n_threads = 14
+main: chat template is available, enabling conversation mode (disable it with -no-cnv)
+*** User-specified prompt will pre-start conversation, did you mean to set --system-prompt (-sys) instead?
+main: chat template example:
+<|start|>system<|message|>You are a helpful assistant<|end|><|start|>user<|message|>Hello<|end|><|start|>assistant<|message|>Hi there<|return|><|start|>user<|message|>How are you?<|end|><|start|>assistant
+
+system_info: n_threads = 14 (n_threads_batch = 14) / 28 | CPU : SSE3 = 1 | SSSE3 = 1 | AVX = 1 | AVX_VNNI = 1 | AVX2 = 1 | F16C = 1 | FMA = 1 | BMI2 = 1 | LLAMAFILE = 1 | OPENMP = 1 | REPACK = 1 | 
+
+main: interactive mode on.
+sampler seed: 42
+sampler params: 
+	repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
+	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = -1
+	top_k = 40, top_p = 0.950, min_p = 0.050, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.000
+	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+sampler chain: logits -> ?penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> min-p -> ?xtc -> temp-ext -> dist 
+generate: n_ctx = 131072, n_batch = 2048, n_predict = 256, n_keep = 0
+
+== Running in interactive mode. ==
+ - Press Ctrl+C to interject at any time.
+ - Press Return to return control to the AI.
+ - To return control without starting a new line, end your input with '/'.
+ - If you want to submit another line, end your input with '\'.
+ - Not using system message. To change it, set a different value via -sys PROMPT
+
+<|channel|>analysis<|message|>We need to explain the halting problem in one paragraph. The halting problem: given a description of a program and its input, determine whether the program will eventually halt or run forever. It's undecidable: no algorithm can solve it for all programs. We can mention Turing's proof, reduction to contradiction, diagonalization, etc. Provide a concise explanation.<|end|><|start|>assistant<|channel|>final<|message|>The halting problem asks whether there exists a single algorithm that, given any computer program and its input, can always decide in finite time whether that program will eventually stop running (halt) or continue forever. In 1936, Alan Turing proved that no such universal algorithm can exist: by constructing a self‑referential “diagonal” program that behaves opposite to what the hypothetical halting‑detector predicts, he showed that assuming a halting‑detector leads to a logical contradiction. Thus, the halting problem is undecidable—there is no general procedure that can correctly determine for every program whether it will halt.
+
+> EOF by user
+
+
+common_perf_print:    sampling time =      70.59 ms
+common_perf_print:    samplers time =      23.17 ms /   225 tokens
+common_perf_print:        load time =   45015.79 ms
+common_perf_print: prompt eval time =    2383.77 ms /    15 tokens (  158.92 ms per token,     6.29 tokens per second)
+common_perf_print:        eval time =   48624.26 ms /   209 runs   (  232.65 ms per token,     4.30 tokens per second)
+common_perf_print:       total time =   51286.64 ms /   224 tokens
+common_perf_print: unaccounted time =     208.02 ms /   0.4 %      (total - sampling - prompt eval - eval) / (total)
+common_perf_print:    graphs reused =        208
+llama_memory_breakdown_print: | memory breakdown [MiB] | total   free     self   model   context   compute    unaccounted |
+llama_memory_breakdown_print: |   - Host               |                 15045 = 11536 +    3090 +     419                |
+llama_memory_breakdown_print: |   - CPU_REPACK         |                  9682 =  9682 +       0 +       0                |
+
+--- Run: 4 ---
+build: 1 (f6235a4) with GNU 15.2.0 for Windows AMD64
+main: llama backend init
+main: load the model and apply lora adapter, if any
+common_init_result: fitting params to device memory, for bugs during this step try to reproduce them with -fit off, or provide --verbose logs if the bug only occurs with -fit on
+llama_params_fit_impl: no devices with dedicated memory found
+llama_params_fit: successfully fit params to free device memory
+llama_params_fit: fitting params to free memory took 0.46 seconds
+llama_model_loader: loaded meta data with 35 key-value pairs and 459 tensors from gpt-oss-20b-gguf/gpt-oss-20b-mxfp4.gguf (version GGUF V3 (latest))
+llama_model_loader: Dumping metadata keys/values. Note: KV overrides do not apply in this output.
+llama_model_loader: - kv   0:                       general.architecture str              = gpt-oss
+llama_model_loader: - kv   1:                               general.type str              = model
+llama_model_loader: - kv   2:                               general.name str              = Gpt Oss 20b
+llama_model_loader: - kv   3:                           general.basename str              = gpt-oss
+llama_model_loader: - kv   4:                         general.size_label str              = 20B
+llama_model_loader: - kv   5:                            general.license str              = apache-2.0
+llama_model_loader: - kv   6:                               general.tags arr[str,2]       = ["vllm", "text-generation"]
+llama_model_loader: - kv   7:                        gpt-oss.block_count u32              = 24
+llama_model_loader: - kv   8:                     gpt-oss.context_length u32              = 131072
+llama_model_loader: - kv   9:                   gpt-oss.embedding_length u32              = 2880
+llama_model_loader: - kv  10:                gpt-oss.feed_forward_length u32              = 2880
+llama_model_loader: - kv  11:               gpt-oss.attention.head_count u32              = 64
+llama_model_loader: - kv  12:            gpt-oss.attention.head_count_kv u32              = 8
+llama_model_loader: - kv  13:                     gpt-oss.rope.freq_base f32              = 150000.000000
+llama_model_loader: - kv  14:   gpt-oss.attention.layer_norm_rms_epsilon f32              = 0.000010
+llama_model_loader: - kv  15:                       gpt-oss.expert_count u32              = 32
+llama_model_loader: - kv  16:                  gpt-oss.expert_used_count u32              = 4
+llama_model_loader: - kv  17:               gpt-oss.attention.key_length u32              = 64
+llama_model_loader: - kv  18:             gpt-oss.attention.value_length u32              = 64
+llama_model_loader: - kv  19:           gpt-oss.attention.sliding_window u32              = 128
+llama_model_loader: - kv  20:         gpt-oss.expert_feed_forward_length u32              = 2880
+llama_model_loader: - kv  21:                  gpt-oss.rope.scaling.type str              = yarn
+llama_model_loader: - kv  22:                gpt-oss.rope.scaling.factor f32              = 32.000000
+llama_model_loader: - kv  23: gpt-oss.rope.scaling.original_context_length u32              = 4096
+llama_model_loader: - kv  24:                       tokenizer.ggml.model str              = gpt2
+llama_model_loader: - kv  25:                         tokenizer.ggml.pre str              = gpt-4o
+llama_model_loader: - kv  26:                      tokenizer.ggml.tokens arr[str,201088]  = ["!", "\"", "#", "$", "%", "&", "'", ...
+llama_model_loader: - kv  27:                  tokenizer.ggml.token_type arr[i32,201088]  = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...
+llama_model_loader: - kv  28:                      tokenizer.ggml.merges arr[str,446189]  = ["Ġ Ġ", "Ġ ĠĠĠ", "ĠĠ ĠĠ", "...
+llama_model_loader: - kv  29:                tokenizer.ggml.bos_token_id u32              = 199998
+llama_model_loader: - kv  30:                tokenizer.ggml.eos_token_id u32              = 200002
+llama_model_loader: - kv  31:            tokenizer.ggml.padding_token_id u32              = 199999
+llama_model_loader: - kv  32:                    tokenizer.chat_template str              = {#-\n  In addition to the normal input...
+llama_model_loader: - kv  33:               general.quantization_version u32              = 2
+llama_model_loader: - kv  34:                          general.file_type u32              = 38
+llama_model_loader: - type  f32:  289 tensors
+llama_model_loader: - type q8_0:   98 tensors
+llama_model_loader: - type mxfp4:   72 tensors
+print_info: file format = GGUF V3 (latest)
+print_info: file type   = MXFP4 MoE
+print_info: file size   = 11.27 GiB (4.63 BPW) 
+load: 0 unused tokens
+load: setting token '<|message|>' (200008) attribute to USER_DEFINED (16), old attributes: 8
+load: setting token '<|start|>' (200006) attribute to USER_DEFINED (16), old attributes: 8
+load: setting token '<|constrain|>' (200003) attribute to USER_DEFINED (16), old attributes: 8
+load: setting token '<|channel|>' (200005) attribute to USER_DEFINED (16), old attributes: 8
+load: printing all EOG tokens:
+load:   - 199999 ('<|endoftext|>')
+load:   - 200002 ('<|return|>')
+load:   - 200007 ('<|end|>')
+load:   - 200012 ('<|call|>')
+load: special_eog_ids contains both '<|return|>' and '<|call|>', or '<|calls|>' and '<|flush|>' tokens, removing '<|end|>' token from EOG list
+load: special tokens cache size = 21
+load: token to piece cache size = 1.3332 MB
+print_info: arch                  = gpt-oss
+print_info: vocab_only            = 0
+print_info: no_alloc              = 0
+print_info: n_ctx_train           = 131072
+print_info: n_embd                = 2880
+print_info: n_embd_inp            = 2880
+print_info: n_layer               = 24
+print_info: n_head                = 64
+print_info: n_head_kv             = 8
+print_info: n_rot                 = 64
+print_info: n_swa                 = 128
+print_info: is_swa_any            = 1
+print_info: n_embd_head_k         = 64
+print_info: n_embd_head_v         = 64
+print_info: n_gqa                 = 8
+print_info: n_embd_k_gqa          = 512
+print_info: n_embd_v_gqa          = 512
+print_info: f_norm_eps            = 0.0e+00
+print_info: f_norm_rms_eps        = 1.0e-05
+print_info: f_clamp_kqv           = 0.0e+00
+print_info: f_max_alibi_bias      = 0.0e+00
+print_info: f_logit_scale         = 0.0e+00
+print_info: f_attn_scale          = 0.0e+00
+print_info: n_ff                  = 2880
+print_info: n_expert              = 32
+print_info: n_expert_used         = 4
+print_info: n_expert_groups       = 0
+print_info: n_group_used          = 0
+print_info: causal attn           = 1
+print_info: pooling type          = 0
+print_info: rope type             = 2
+print_info: rope scaling          = yarn
+print_info: freq_base_train       = 150000.0
+print_info: freq_scale_train      = 0.03125
+print_info: freq_base_swa         = 150000.0
+print_info: freq_scale_swa        = 0.03125
+print_info: n_ctx_orig_yarn       = 4096
+print_info: rope_yarn_log_mul     = 0.0000
+print_info: rope_finetuned        = unknown
+print_info: model type            = 20B
+print_info: model params          = 20.91 B
+print_info: general.name          = Gpt Oss 20b
+print_info: n_ff_exp              = 2880
+print_info: vocab type            = BPE
+print_info: n_vocab               = 201088
+print_info: n_merges              = 446189
+print_info: BOS token             = 199998 '<|startoftext|>'
+print_info: EOS token             = 200002 '<|return|>'
+print_info: EOT token             = 199999 '<|endoftext|>'
+print_info: PAD token             = 199999 '<|endoftext|>'
+print_info: LF token              = 198 'Ċ'
+print_info: EOG token             = 199999 '<|endoftext|>'
+print_info: EOG token             = 200002 '<|return|>'
+print_info: EOG token             = 200012 '<|call|>'
+print_info: max token length      = 256
+load_tensors: loading model tensors, this can take a while... (mmap = true, direct_io = false)
+load_tensors:   CPU_Mapped model buffer size = 11536.18 MiB
+load_tensors:   CPU_REPACK model buffer size =  9682.03 MiB
+................................................................................
+common_init_result: added <|endoftext|> logit bias = -inf
+common_init_result: added <|return|> logit bias = -inf
+common_init_result: added <|call|> logit bias = -inf
+llama_context: constructing llama_context
+llama_context: n_seq_max     = 1
+llama_context: n_ctx         = 131072
+llama_context: n_ctx_seq     = 131072
+llama_context: n_batch       = 2048
+llama_context: n_ubatch      = 512
+llama_context: causal_attn   = 1
+llama_context: flash_attn    = auto
+llama_context: kv_unified    = false
+llama_context: freq_base     = 150000.0
+llama_context: freq_scale    = 0.03125
+llama_context:        CPU  output buffer size =     0.77 MiB
+llama_kv_cache_iswa: creating non-SWA KV cache, size = 131072 cells
+llama_kv_cache:        CPU KV buffer size =  3072.00 MiB
+llama_kv_cache: size = 3072.00 MiB (131072 cells,  12 layers,  1/1 seqs), K (f16): 1536.00 MiB, V (f16): 1536.00 MiB
+llama_kv_cache_iswa: creating     SWA KV cache, size = 768 cells
+llama_kv_cache:        CPU KV buffer size =    18.00 MiB
+llama_kv_cache: size =   18.00 MiB (   768 cells,  12 layers,  1/1 seqs), K (f16):    9.00 MiB, V (f16):    9.00 MiB
+sched_reserve: reserving ...
+sched_reserve: Flash Attention was auto, set to enabled
+sched_reserve:        CPU compute buffer size =   419.15 MiB
+sched_reserve: graph nodes  = 1352
+sched_reserve: graph splits = 1
+sched_reserve: reserve took 12.80 ms, sched copies = 1
+common_init_from_params: warming up the model with an empty run - please wait ... (--no-warmup to disable)
+main: llama threadpool init, n_threads = 14
+main: chat template is available, enabling conversation mode (disable it with -no-cnv)
+*** User-specified prompt will pre-start conversation, did you mean to set --system-prompt (-sys) instead?
+main: chat template example:
+<|start|>system<|message|>You are a helpful assistant<|end|><|start|>user<|message|>Hello<|end|><|start|>assistant<|message|>Hi there<|return|><|start|>user<|message|>How are you?<|end|><|start|>assistant
+
+system_info: n_threads = 14 (n_threads_batch = 14) / 28 | CPU : SSE3 = 1 | SSSE3 = 1 | AVX = 1 | AVX_VNNI = 1 | AVX2 = 1 | F16C = 1 | FMA = 1 | BMI2 = 1 | LLAMAFILE = 1 | OPENMP = 1 | REPACK = 1 | 
+
+main: interactive mode on.
+sampler seed: 42
+sampler params: 
+	repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
+	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = -1
+	top_k = 40, top_p = 0.950, min_p = 0.050, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.000
+	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+sampler chain: logits -> ?penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> min-p -> ?xtc -> temp-ext -> dist 
+generate: n_ctx = 131072, n_batch = 2048, n_predict = 256, n_keep = 0
+
+== Running in interactive mode. ==
+ - Press Ctrl+C to interject at any time.
+ - Press Return to return control to the AI.
+ - To return control without starting a new line, end your input with '/'.
+ - If you want to submit another line, end your input with '\'.
+ - Not using system message. To change it, set a different value via -sys PROMPT
+
+<|channel|>analysis<|message|>We need to explain the halting problem in one paragraph. The halting problem: given a description of a program and its input, determine whether the program will eventually halt or run forever. It's undecidable: no algorithm can solve it for all programs. We can mention Turing's proof, reduction to contradiction, diagonalization, etc. Provide a concise explanation.<|end|><|start|>assistant<|channel|>final<|message|>The halting problem asks whether there exists a single algorithm that, given any computer program and its input, can always decide in finite time whether that program will eventually stop running (halt) or continue forever. In 1936, Alan Turing proved that no such universal algorithm can exist: by constructing a self‑referential “diagonal” program that behaves opposite to what the hypothetical halting‑detector predicts, he showed that assuming a halting‑detector leads to a logical contradiction. Thus, the halting problem is undecidable—there is no general procedure that can correctly determine for every program whether it will halt.
+
+> EOF by user
+
+
+common_perf_print:    sampling time =      72.11 ms
+common_perf_print:    samplers time =      23.43 ms /   225 tokens
+common_perf_print:        load time =   45037.18 ms
+common_perf_print: prompt eval time =    3558.44 ms /    15 tokens (  237.23 ms per token,     4.22 tokens per second)
+common_perf_print:        eval time =   48347.75 ms /   209 runs   (  231.33 ms per token,     4.32 tokens per second)
+common_perf_print:       total time =   52169.81 ms /   224 tokens
+common_perf_print: unaccounted time =     191.51 ms /   0.4 %      (total - sampling - prompt eval - eval) / (total)
+common_perf_print:    graphs reused =        208
+llama_memory_breakdown_print: | memory breakdown [MiB] | total   free     self   model   context   compute    unaccounted |
+llama_memory_breakdown_print: |   - Host               |                 15045 = 11536 +    3090 +     419                |
+llama_memory_breakdown_print: |   - CPU_REPACK         |                  9682 =  9682 +       0 +       0                |
+
+--- Run: 5 ---
+build: 1 (f6235a4) with GNU 15.2.0 for Windows AMD64
+main: llama backend init
+main: load the model and apply lora adapter, if any
+common_init_result: fitting params to device memory, for bugs during this step try to reproduce them with -fit off, or provide --verbose logs if the bug only occurs with -fit on
+llama_params_fit_impl: no devices with dedicated memory found
+llama_params_fit: successfully fit params to free device memory
+llama_params_fit: fitting params to free memory took 0.46 seconds
+llama_model_loader: loaded meta data with 35 key-value pairs and 459 tensors from gpt-oss-20b-gguf/gpt-oss-20b-mxfp4.gguf (version GGUF V3 (latest))
+llama_model_loader: Dumping metadata keys/values. Note: KV overrides do not apply in this output.
+llama_model_loader: - kv   0:                       general.architecture str              = gpt-oss
+llama_model_loader: - kv   1:                               general.type str              = model
+llama_model_loader: - kv   2:                               general.name str              = Gpt Oss 20b
+llama_model_loader: - kv   3:                           general.basename str              = gpt-oss
+llama_model_loader: - kv   4:                         general.size_label str              = 20B
+llama_model_loader: - kv   5:                            general.license str              = apache-2.0
+llama_model_loader: - kv   6:                               general.tags arr[str,2]       = ["vllm", "text-generation"]
+llama_model_loader: - kv   7:                        gpt-oss.block_count u32              = 24
+llama_model_loader: - kv   8:                     gpt-oss.context_length u32              = 131072
+llama_model_loader: - kv   9:                   gpt-oss.embedding_length u32              = 2880
+llama_model_loader: - kv  10:                gpt-oss.feed_forward_length u32              = 2880
+llama_model_loader: - kv  11:               gpt-oss.attention.head_count u32              = 64
+llama_model_loader: - kv  12:            gpt-oss.attention.head_count_kv u32              = 8
+llama_model_loader: - kv  13:                     gpt-oss.rope.freq_base f32              = 150000.000000
+llama_model_loader: - kv  14:   gpt-oss.attention.layer_norm_rms_epsilon f32              = 0.000010
+llama_model_loader: - kv  15:                       gpt-oss.expert_count u32              = 32
+llama_model_loader: - kv  16:                  gpt-oss.expert_used_count u32              = 4
+llama_model_loader: - kv  17:               gpt-oss.attention.key_length u32              = 64
+llama_model_loader: - kv  18:             gpt-oss.attention.value_length u32              = 64
+llama_model_loader: - kv  19:           gpt-oss.attention.sliding_window u32              = 128
+llama_model_loader: - kv  20:         gpt-oss.expert_feed_forward_length u32              = 2880
+llama_model_loader: - kv  21:                  gpt-oss.rope.scaling.type str              = yarn
+llama_model_loader: - kv  22:                gpt-oss.rope.scaling.factor f32              = 32.000000
+llama_model_loader: - kv  23: gpt-oss.rope.scaling.original_context_length u32              = 4096
+llama_model_loader: - kv  24:                       tokenizer.ggml.model str              = gpt2
+llama_model_loader: - kv  25:                         tokenizer.ggml.pre str              = gpt-4o
+llama_model_loader: - kv  26:                      tokenizer.ggml.tokens arr[str,201088]  = ["!", "\"", "#", "$", "%", "&", "'", ...
+llama_model_loader: - kv  27:                  tokenizer.ggml.token_type arr[i32,201088]  = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...
+llama_model_loader: - kv  28:                      tokenizer.ggml.merges arr[str,446189]  = ["Ġ Ġ", "Ġ ĠĠĠ", "ĠĠ ĠĠ", "...
+llama_model_loader: - kv  29:                tokenizer.ggml.bos_token_id u32              = 199998
+llama_model_loader: - kv  30:                tokenizer.ggml.eos_token_id u32              = 200002
+llama_model_loader: - kv  31:            tokenizer.ggml.padding_token_id u32              = 199999
+llama_model_loader: - kv  32:                    tokenizer.chat_template str              = {#-\n  In addition to the normal input...
+llama_model_loader: - kv  33:               general.quantization_version u32              = 2
+llama_model_loader: - kv  34:                          general.file_type u32              = 38
+llama_model_loader: - type  f32:  289 tensors
+llama_model_loader: - type q8_0:   98 tensors
+llama_model_loader: - type mxfp4:   72 tensors
+print_info: file format = GGUF V3 (latest)
+print_info: file type   = MXFP4 MoE
+print_info: file size   = 11.27 GiB (4.63 BPW) 
+load: 0 unused tokens
+load: setting token '<|message|>' (200008) attribute to USER_DEFINED (16), old attributes: 8
+load: setting token '<|start|>' (200006) attribute to USER_DEFINED (16), old attributes: 8
+load: setting token '<|constrain|>' (200003) attribute to USER_DEFINED (16), old attributes: 8
+load: setting token '<|channel|>' (200005) attribute to USER_DEFINED (16), old attributes: 8
+load: printing all EOG tokens:
+load:   - 199999 ('<|endoftext|>')
+load:   - 200002 ('<|return|>')
+load:   - 200007 ('<|end|>')
+load:   - 200012 ('<|call|>')
+load: special_eog_ids contains both '<|return|>' and '<|call|>', or '<|calls|>' and '<|flush|>' tokens, removing '<|end|>' token from EOG list
+load: special tokens cache size = 21
+load: token to piece cache size = 1.3332 MB
+print_info: arch                  = gpt-oss
+print_info: vocab_only            = 0
+print_info: no_alloc              = 0
+print_info: n_ctx_train           = 131072
+print_info: n_embd                = 2880
+print_info: n_embd_inp            = 2880
+print_info: n_layer               = 24
+print_info: n_head                = 64
+print_info: n_head_kv             = 8
+print_info: n_rot                 = 64
+print_info: n_swa                 = 128
+print_info: is_swa_any            = 1
+print_info: n_embd_head_k         = 64
+print_info: n_embd_head_v         = 64
+print_info: n_gqa                 = 8
+print_info: n_embd_k_gqa          = 512
+print_info: n_embd_v_gqa          = 512
+print_info: f_norm_eps            = 0.0e+00
+print_info: f_norm_rms_eps        = 1.0e-05
+print_info: f_clamp_kqv           = 0.0e+00
+print_info: f_max_alibi_bias      = 0.0e+00
+print_info: f_logit_scale         = 0.0e+00
+print_info: f_attn_scale          = 0.0e+00
+print_info: n_ff                  = 2880
+print_info: n_expert              = 32
+print_info: n_expert_used         = 4
+print_info: n_expert_groups       = 0
+print_info: n_group_used          = 0
+print_info: causal attn           = 1
+print_info: pooling type          = 0
+print_info: rope type             = 2
+print_info: rope scaling          = yarn
+print_info: freq_base_train       = 150000.0
+print_info: freq_scale_train      = 0.03125
+print_info: freq_base_swa         = 150000.0
+print_info: freq_scale_swa        = 0.03125
+print_info: n_ctx_orig_yarn       = 4096
+print_info: rope_yarn_log_mul     = 0.0000
+print_info: rope_finetuned        = unknown
+print_info: model type            = 20B
+print_info: model params          = 20.91 B
+print_info: general.name          = Gpt Oss 20b
+print_info: n_ff_exp              = 2880
+print_info: vocab type            = BPE
+print_info: n_vocab               = 201088
+print_info: n_merges              = 446189
+print_info: BOS token             = 199998 '<|startoftext|>'
+print_info: EOS token             = 200002 '<|return|>'
+print_info: EOT token             = 199999 '<|endoftext|>'
+print_info: PAD token             = 199999 '<|endoftext|>'
+print_info: LF token              = 198 'Ċ'
+print_info: EOG token             = 199999 '<|endoftext|>'
+print_info: EOG token             = 200002 '<|return|>'
+print_info: EOG token             = 200012 '<|call|>'
+print_info: max token length      = 256
+load_tensors: loading model tensors, this can take a while... (mmap = true, direct_io = false)
+load_tensors:   CPU_Mapped model buffer size = 11536.18 MiB
+load_tensors:   CPU_REPACK model buffer size =  9682.03 MiB
+................................................................................
+common_init_result: added <|endoftext|> logit bias = -inf
+common_init_result: added <|return|> logit bias = -inf
+common_init_result: added <|call|> logit bias = -inf
+llama_context: constructing llama_context
+llama_context: n_seq_max     = 1
+llama_context: n_ctx         = 131072
+llama_context: n_ctx_seq     = 131072
+llama_context: n_batch       = 2048
+llama_context: n_ubatch      = 512
+llama_context: causal_attn   = 1
+llama_context: flash_attn    = auto
+llama_context: kv_unified    = false
+llama_context: freq_base     = 150000.0
+llama_context: freq_scale    = 0.03125
+llama_context:        CPU  output buffer size =     0.77 MiB
+llama_kv_cache_iswa: creating non-SWA KV cache, size = 131072 cells
+llama_kv_cache:        CPU KV buffer size =  3072.00 MiB
+llama_kv_cache: size = 3072.00 MiB (131072 cells,  12 layers,  1/1 seqs), K (f16): 1536.00 MiB, V (f16): 1536.00 MiB
+llama_kv_cache_iswa: creating     SWA KV cache, size = 768 cells
+llama_kv_cache:        CPU KV buffer size =    18.00 MiB
+llama_kv_cache: size =   18.00 MiB (   768 cells,  12 layers,  1/1 seqs), K (f16):    9.00 MiB, V (f16):    9.00 MiB
+sched_reserve: reserving ...
+sched_reserve: Flash Attention was auto, set to enabled
+sched_reserve:        CPU compute buffer size =   419.15 MiB
+sched_reserve: graph nodes  = 1352
+sched_reserve: graph splits = 1
+sched_reserve: reserve took 9.43 ms, sched copies = 1
+common_init_from_params: warming up the model with an empty run - please wait ... (--no-warmup to disable)
+main: llama threadpool init, n_threads = 14
+main: chat template is available, enabling conversation mode (disable it with -no-cnv)
+*** User-specified prompt will pre-start conversation, did you mean to set --system-prompt (-sys) instead?
+main: chat template example:
+<|start|>system<|message|>You are a helpful assistant<|end|><|start|>user<|message|>Hello<|end|><|start|>assistant<|message|>Hi there<|return|><|start|>user<|message|>How are you?<|end|><|start|>assistant
+
+system_info: n_threads = 14 (n_threads_batch = 14) / 28 | CPU : SSE3 = 1 | SSSE3 = 1 | AVX = 1 | AVX_VNNI = 1 | AVX2 = 1 | F16C = 1 | FMA = 1 | BMI2 = 1 | LLAMAFILE = 1 | OPENMP = 1 | REPACK = 1 | 
+
+main: interactive mode on.
+sampler seed: 42
+sampler params: 
+	repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
+	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = -1
+	top_k = 40, top_p = 0.950, min_p = 0.050, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.000
+	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+sampler chain: logits -> ?penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> min-p -> ?xtc -> temp-ext -> dist 
+generate: n_ctx = 131072, n_batch = 2048, n_predict = 256, n_keep = 0
+
+== Running in interactive mode. ==
+ - Press Ctrl+C to interject at any time.
+ - Press Return to return control to the AI.
+ - To return control without starting a new line, end your input with '/'.
+ - If you want to submit another line, end your input with '\'.
+ - Not using system message. To change it, set a different value via -sys PROMPT
+
+<|channel|>analysis<|message|>We need to explain the halting problem in one paragraph. The halting problem: given a description of a program and its input, determine whether the program will eventually halt or run forever. It's undecidable: no algorithm can solve it for all programs. We can mention Turing's proof, reduction to contradiction, diagonalization, etc. Provide a concise explanation.<|end|><|start|>assistant<|channel|>final<|message|>The halting problem asks whether there exists a single algorithm that, given any computer program and its input, can always decide in finite time whether that program will eventually stop running (halt) or continue forever. In 1936, Alan Turing proved that no such universal algorithm can exist: by constructing a self‑referential “diagonal” program that behaves opposite to what the hypothetical halting‑detector predicts, he showed that assuming a halting‑detector leads to a logical contradiction. Thus, the halting problem is undecidable—there is no general procedure that can correctly determine for every program whether it will halt.
+
+> EOF by user
+
+
+common_perf_print:    sampling time =      72.13 ms
+common_perf_print:    samplers time =      23.28 ms /   225 tokens
+common_perf_print:        load time =   46161.59 ms
+common_perf_print: prompt eval time =    2457.82 ms /    15 tokens (  163.85 ms per token,     6.10 tokens per second)
+common_perf_print:        eval time =   48765.40 ms /   209 runs   (  233.33 ms per token,     4.29 tokens per second)
+common_perf_print:       total time =   51496.14 ms /   224 tokens
+common_perf_print: unaccounted time =     200.80 ms /   0.4 %      (total - sampling - prompt eval - eval) / (total)
+common_perf_print:    graphs reused =        208
+llama_memory_breakdown_print: | memory breakdown [MiB] | total   free     self   model   context   compute    unaccounted |
+llama_memory_breakdown_print: |   - Host               |                 15045 = 11536 +    3090 +     419                |
+llama_memory_breakdown_print: |   - CPU_REPACK         |                  9682 =  9682 +       0 +       0                |
+
+=== llama-bench ===
+| model                          |       size |     params | backend    | threads |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | ------: | --------------: | -------------------: |
+| gpt-oss 20B MXFP4 MoE          |  11.27 GiB |    20.91 B | CPU        |      14 |           pp128 |         29.98 ± 6.02 |
+| gpt-oss 20B MXFP4 MoE          |  11.27 GiB |    20.91 B | CPU        |      14 |           pp512 |         54.99 ± 0.23 |
+| gpt-oss 20B MXFP4 MoE          |  11.27 GiB |    20.91 B | CPU        |      14 |           tg128 |          4.38 ± 0.03 |
+
+build: f6235a4 (1)

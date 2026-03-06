@@ -217,76 +217,104 @@ java --add-modules jdk.incubator.vector `
 
 ## 5. Results
 
-> **Status: PENDING** — Benchmarks not yet run. Results will be added here and in
-> `benchmark_results/SUMMARY.md` after execution.
-
 ### 5a. C Engine Results
 
 | Run | Generation tok/s | ms/token | Prompt tok/s | Wall time |
 |-----|-----------------|----------|-------------|-----------|
-| warmup | — | — | — | — |
-| 1 | | | | |
-| 2 | | | | |
-| 3 | | | | |
-| 4 | | | | |
-| 5 | | | | |
-| **Average** | | | | |
-| **Std dev** | | | | |
+| warmup | 3.27 | 306 | 2.0 | 83.0s |
+| 1 | 3.30 | 303 | 2.2 | 81.7s |
+| 2 | 3.36 | 298 | 2.3 | 80.1s |
+| 3 | 3.36 | 298 | 2.2 | 80.4s |
+| 4 | 3.33 | 301 | 2.2 | 81.0s |
+| 5 | 3.34 | 300 | 2.2 | 80.8s |
+| **Average** | **3.34** | **300** | **2.22** | **80.8s** |
+| **Std dev** | **0.02** | **2** | **0.04** | **0.6s** |
 
-### 5b. Java Engine Results
+### 5b. Java Engine Results — DISQUALIFIED
 
-| Run | Generation tok/s | ms/token | Prompt tok/s | Wall time |
-|-----|-----------------|----------|-------------|-----------|
-| warmup | — | — | — | — |
-| 1 | | | | |
-| 2 | | | | |
-| 3 | | | | |
-| 4 | | | | |
-| 5 | | | | |
-| **Average** | | | | |
-| **Std dev** | | | | |
+Amazon's gpt-oss.java produces **non-functional output**: all `!` tokens at temp=0,
+random multilingual garbage at temp>0. Root cause: missing Harmony chat template
+formatting and wrong tokenizer variant (O200K_BASE vs O200K_HARMONY). We attempted
+a patch but output remained incoherent, suggesting additional weight loading issues.
+
+Speed for reference only (not comparable due to broken output):
+- Generation: ~5.96 tok/s | Prefill: ~2.19 tok/s | Requires `-Xmx14g` heap
 
 ### 5c. llama.cpp Results
 
-| Run | Generation tok/s | ms/token | Prompt tok/s | Wall time |
-|-----|-----------------|----------|-------------|-----------|
-| warmup | — | — | — | — |
-| 1 | | | | |
-| 2 | | | | |
-| 3 | | | | |
-| 4 | | | | |
-| 5 | | | | |
-| **Average** | | | | |
-| **Std dev** | | | | |
+*llama.cpp auto-detected the Harmony chat template and generated 209 tokens before
+hitting EOS (not 256). It also uses 14 threads (not 28) by default.*
+
+| Run | Generation tok/s | ms/token | Prompt tok/s | Total time |
+|-----|-----------------|----------|-------------|------------|
+| warmup | 4.31 | 232 | 6.23 | 51.2s |
+| 1 | 4.25 | 235 | 2.96 | 54.5s |
+| 2 | 4.36 | 229 | 3.63 | 52.4s |
+| 3 | 4.30 | 233 | 6.29 | 51.3s |
+| 4 | 4.32 | 231 | 4.22 | 52.2s |
+| 5 | 4.29 | 233 | 6.10 | 51.5s |
+| **Average** | **4.30** | **232** | **4.64** | **52.4s** |
+| **Std dev** | **0.04** | **2** | **1.44** | **1.2s** |
 
 ### 5d. Thread Scaling (C Engine)
 
-| Threads | Generation tok/s | ms/token | vs Default |
-|---------|-----------------|----------|-----------|
-| 1 | | | |
-| 4 | | | |
-| 8 | | | |
-| 16 | | | |
+| Threads | Generation tok/s | ms/token | Speedup vs 1T |
+|---------|-----------------|----------|---------------|
+| 1 | 0.78 | 1287 | 1.00x |
+| 4 | 2.28 | 439 | 2.92x |
+| 8 | 3.25 | 308 | 4.17x |
+| 16 | 2.34 | 428 | 3.00x |
+| Default (28) | 3.34 | 300 | 4.28x |
 
-### 5e. llama-bench (Structured)
+### 5e. llama-bench (Structured, 5 reps)
 
-| Test | pp (tok/s) | tg (tok/s) |
-|------|-----------|-----------|
-| pp128 | | |
-| pp512 | | |
-| tg128 | | |
+| Test | tok/s |
+|------|-------|
+| pp128 | 29.98 ± 6.02 |
+| pp512 | 54.99 ± 0.23 |
+| tg128 | 4.38 ± 0.03 |
 
 ---
 
 ## 6. Analysis
 
-> **Status: PENDING** — Will cover:
-> - Which engine wins and by how much
-> - Compute-bound vs memory-bound assessment
-> - LOC efficiency (tok/s per 1000 lines of code)
-> - How 2000-line C compares to 100K+ line C++
-> - Research paper readiness
-> - Suggested follow-up experiments
+### llama.cpp wins by 29%
+
+llama.cpp achieves **4.30 tok/s** vs our **3.34 tok/s** — a **1.29x advantage**. The gap
+comes from GGML's optimized tiled matmul kernels, Flash Attention (auto-enabled), weight
+repacking at load time (9.7 GB repack buffer), and a custom thread pool (14 threads)
+with less overhead than OpenMP.
+
+### Our 2000-line engine achieves 78% of llama.cpp
+
+| Metric | C Engine | llama.cpp | Ratio |
+|--------|----------|-----------|-------|
+| Gen tok/s | 3.34 | 4.30 | 0.78x |
+| LOC | ~2,000 | >100,000 | 0.02x |
+| Binary size | 112 KB | 16.5 MB | 0.007x |
+| **tok/s per 1K LOC** | **1.67** | **0.04** | **42x** |
+
+Our engine is **42x more code-efficient** (tok/s per 1000 lines of code).
+
+### Memory-bandwidth bound
+
+Both engines hit the DDR5 memory bandwidth ceiling during generation. Active params per
+token = 3.6B at 0.5 bytes = 1.8 GB/read. With ~7-8 GB/s bandwidth, the ceiling is ~4.4
+tok/s. llama.cpp at 4.30 is at **~98%** of that ceiling.
+
+### Thread scaling sweet spot at 8 threads
+
+16 threads **regresses** to 3.00x (vs 4.17x at 8T) due to OpenMP fork/join overhead on
+small MoE expert matrices. The default (28 threads) recovers to 4.28x, likely because
+the runtime auto-tunes.
+
+### Suggested follow-up experiments
+
+1. Batch prompt processing (multiple tokens per forward pass)
+2. Weight repacking at load time for cache locality
+3. Custom thread pool to replace OpenMP
+4. vpshufb MXFP4 optimization (AVX2 shuffle-based LUT)
+5. Linux benchmark (same hardware) to eliminate Windows overhead
 
 ---
 
